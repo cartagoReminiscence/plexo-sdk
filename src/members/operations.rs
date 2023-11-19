@@ -89,7 +89,7 @@ pub struct GetMembersBy {
 }
 
 impl GetMembersBy {
-    pub fn to_where_clause(&self) -> String {
+    pub fn compile_sql(&self) -> String {
         let mut where_clause = String::new();
         let mut and_clauses = Vec::new();
         let mut or_clauses = Vec::new();
@@ -115,12 +115,12 @@ impl GetMembersBy {
 
         if let Some(and) = &self._and {
             for and_clause in and {
-                and_clauses.push(and_clause.to_where_clause());
+                and_clauses.push(and_clause.compile_sql());
             }
         }
         if let Some(or) = &self._or {
             for or_clause in or {
-                or_clauses.push(or_clause.to_where_clause());
+                or_clauses.push(or_clause.compile_sql());
             }
         }
 
@@ -209,7 +209,7 @@ impl MemberOperations for Engine<Postgres> {
     }
 
     async fn get_members(&self, input: GetMembersInput) -> Result<Vec<Member>, SDKError> {
-        let where_statement = input.filter.to_where_clause();
+        let where_statement = input.filter.compile_sql();
 
         let mut query = format!(
             r#"

@@ -53,7 +53,7 @@ pub struct UpdateProjectInput {
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct GetProjectsInput {
-    pub filter: GetProjectsBy, // Similar to GetTasksBy with relevant fields
+    pub filter: GetProjectsBy,
 
     #[builder(setter(strip_option), default)]
     pub sort_by: Option<String>,
@@ -91,7 +91,7 @@ pub struct GetProjectsBy {
 }
 
 impl GetProjectsBy {
-    pub fn to_where_clause(&self) -> String {
+    pub fn compile_sql(&self) -> String {
         let mut where_clause = String::new();
         if let Some(name) = &self.name {
             where_clause.push_str(&format!("name = '{}'", name));
@@ -118,7 +118,7 @@ impl GetProjectsBy {
             where_clause.push_str(&format!(
                 "({})",
                 _and.iter()
-                    .map(|x| x.to_where_clause())
+                    .map(|x| x.compile_sql())
                     .collect::<Vec<String>>()
                     .join(" AND ")
             ));
@@ -127,7 +127,7 @@ impl GetProjectsBy {
             where_clause.push_str(&format!(
                 "({})",
                 _or.iter()
-                    .map(|x| x.to_where_clause())
+                    .map(|x| x.compile_sql())
                     .collect::<Vec<String>>()
                     .join(" OR ")
             ));
@@ -211,7 +211,7 @@ impl ProjectOperations for Engine<Postgres> {
     }
 
     async fn get_projects(&self, input: GetProjectsInput) -> Result<Vec<Project>, SDKError> {
-        let where_statement = input.filter.to_where_clause();
+        let where_statement = input.filter.compile_sql();
 
         let mut query = format!(
             r#"

@@ -4,7 +4,7 @@ use dotenv::dotenv;
 use plexo_sdk::{
     backend::engine::new_postgres_engine,
     tasks::{
-        operations::{GetTasksByBuilder, GetTasksInputBuilder, TaskOperations},
+        operations::{GetTasksInputBuilder, GetTasksWhereBuilder, TaskOperations},
         relations::TaskRelations,
         task::TaskStatus,
     },
@@ -19,13 +19,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let engine = new_postgres_engine(database_url.as_str()).await.unwrap();
 
     let tasks_filter = GetTasksInputBuilder::default()
-        .task(
-            GetTasksByBuilder::default()
+        .filter(
+            GetTasksWhereBuilder::default()
                 ._or(vec![
-                    GetTasksByBuilder::default()
+                    GetTasksWhereBuilder::default()
                         .status(TaskStatus::InProgress)
                         .build()?,
-                    GetTasksByBuilder::default()
+                    GetTasksWhereBuilder::default()
                         .status(TaskStatus::Done)
                         .build()?,
                 ])
@@ -36,9 +36,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let tasks = engine.get_tasks(tasks_filter).await?;
 
+    println!("total tasks: {}", tasks.len());
+
     let project = tasks.first().unwrap().project().await?;
 
-    println!("{:?}", project);
+    println!("project: {}", project.name);
 
     Ok(())
 }

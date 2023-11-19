@@ -24,7 +24,7 @@ pub trait TaskOperations {
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct GetTasksInput {
-    pub task: GetTasksBy,
+    pub filter: GetTasksWhere,
 
     #[builder(setter(strip_option), default)]
     pub sort_by: Option<String>,
@@ -74,7 +74,7 @@ pub struct UpdateTaskInput {
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
-pub struct GetTasksBy {
+pub struct GetTasksWhere {
     #[builder(setter(strip_option), default)]
     pub owner_id: Option<Uuid>,
     #[builder(setter(strip_option), default)]
@@ -95,13 +95,13 @@ pub struct GetTasksBy {
     pub parent_id: Option<Uuid>,
 
     #[builder(setter(strip_option), default)]
-    pub _and: Option<Vec<GetTasksBy>>,
+    pub _and: Option<Vec<GetTasksWhere>>,
     #[builder(setter(strip_option), default)]
-    pub _or: Option<Vec<GetTasksBy>>,
+    pub _or: Option<Vec<GetTasksWhere>>,
 }
 
-impl GetTasksBy {
-    pub fn to_where_clause(&self) -> String {
+impl GetTasksWhere {
+    pub fn compile_sql(&self) -> String {
         let mut conditions = Vec::new();
 
         if let Some(owner_id) = &self.owner_id {
@@ -141,13 +141,12 @@ impl GetTasksBy {
         }
 
         if let Some(ands) = &self._and {
-            let and_conditions: Vec<String> =
-                ands.iter().map(|and| and.to_where_clause()).collect();
+            let and_conditions: Vec<String> = ands.iter().map(|and| and.compile_sql()).collect();
             conditions.push(format!("({})", and_conditions.join(" AND ")));
         }
 
         if let Some(ors) = &self._or {
-            let or_conditions: Vec<String> = ors.iter().map(|or| or.to_where_clause()).collect();
+            let or_conditions: Vec<String> = ors.iter().map(|or| or.compile_sql()).collect();
             conditions.push(format!("({})", or_conditions.join(" OR ")));
         }
 
@@ -325,7 +324,7 @@ impl TaskOperations for Engine<Postgres> {
     }
 
     async fn get_tasks(&self, input: GetTasksInput) -> Result<Vec<Task>, SDKError> {
-        let where_statement = input.task.to_where_clause();
+        let where_statement = input.filter.compile_sql();
 
         let mut query = format!(
             r#"
