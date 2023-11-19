@@ -11,7 +11,7 @@ use crate::{backend::engine::Engine, common::commons::SortOrder, errors::sdk::SD
 use super::member::{Member, MemberRole};
 
 #[async_trait]
-pub trait MemberOperations {
+pub trait MemberCrudOperations {
     async fn create_member(&self, input: CreateMemberInput) -> Result<Member, SDKError>;
     async fn get_member(&self, id: Uuid) -> Result<Member, SDKError>;
     async fn get_members(&self, input: GetMembersInput) -> Result<Vec<Member>, SDKError>;
@@ -53,7 +53,8 @@ pub struct UpdateMemberInput {
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct GetMembersInput {
-    pub filter: GetMembersBy,
+    #[builder(setter(strip_option), default)]
+    pub filter: Option<GetMembersWhere>,
 
     #[builder(setter(strip_option), default)]
     pub sort_by: Option<String>,
@@ -68,7 +69,7 @@ pub struct GetMembersInput {
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
-pub struct GetMembersBy {
+pub struct GetMembersWhere {
     #[builder(setter(strip_option), default)]
     pub name: Option<String>,
     #[builder(setter(strip_option), default)]
@@ -83,12 +84,12 @@ pub struct GetMembersBy {
     pub photo_url: Option<String>,
 
     #[builder(setter(strip_option), default)]
-    pub _and: Option<Vec<GetMembersBy>>,
+    pub _and: Option<Vec<GetMembersWhere>>,
     #[builder(setter(strip_option), default)]
-    pub _or: Option<Vec<GetMembersBy>>,
+    pub _or: Option<Vec<GetMembersWhere>>,
 }
 
-impl GetMembersBy {
+impl GetMembersWhere {
     pub fn compile_sql(&self) -> String {
         let mut where_clause = String::new();
         let mut and_clauses = Vec::new();
@@ -139,7 +140,7 @@ impl GetMembersBy {
 }
 
 #[async_trait]
-impl MemberOperations for Engine<Postgres> {
+impl MemberCrudOperations for Engine<Postgres> {
     async fn create_member(&self, input: CreateMemberInput) -> Result<Member, SDKError> {
         let member_final_info = sqlx::query!(
             r#"
@@ -209,15 +210,11 @@ impl MemberOperations for Engine<Postgres> {
     }
 
     async fn get_members(&self, input: GetMembersInput) -> Result<Vec<Member>, SDKError> {
-        let where_statement = input.filter.compile_sql();
+        let mut query = "SELECT * FROM members ".to_string();
 
-        let mut query = format!(
-            r#"
-            SELECT * FROM members
-            WHERE {}
-            "#,
-            where_statement
-        );
+        if let Some(filter) = input.filter {
+            query.push_str(format!("WHERE {} ", filter.compile_sql()).as_str());
+        }
 
         if let Some(sort_by) = input.sort_by {
             query.push_str(format!("ORDER BY {} ", sort_by).as_str());

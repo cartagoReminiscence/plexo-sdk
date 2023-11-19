@@ -13,7 +13,7 @@ use crate::errors::sdk::SDKError;
 use crate::tasks::task::{Task, TaskPriority, TaskStatus};
 
 #[async_trait]
-pub trait TaskOperations {
+pub trait TaskCrudOperations {
     async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError>;
     async fn get_task(&self, id: Uuid) -> Result<Task, SDKError>;
     async fn get_tasks(&self, input: GetTasksInput) -> Result<Vec<Task>, SDKError>;
@@ -24,7 +24,8 @@ pub trait TaskOperations {
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct GetTasksInput {
-    pub filter: GetTasksWhere,
+    #[builder(setter(strip_option), default)]
+    pub filter: Option<GetTasksWhere>,
 
     #[builder(setter(strip_option), default)]
     pub sort_by: Option<String>,
@@ -155,7 +156,7 @@ impl GetTasksWhere {
 }
 
 #[async_trait]
-impl TaskOperations for Engine<Postgres> {
+impl TaskCrudOperations for Engine<Postgres> {
     async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError> {
         let task_final_info = sqlx::query!(r#"
             INSERT INTO tasks (title, description, owner_id, status, priority, due_date, project_id, lead_id, parent_id)
@@ -324,15 +325,11 @@ impl TaskOperations for Engine<Postgres> {
     }
 
     async fn get_tasks(&self, input: GetTasksInput) -> Result<Vec<Task>, SDKError> {
-        let where_statement = input.filter.compile_sql();
+        let mut query = "SELECT * FROM tasks ".to_string();
 
-        let mut query = format!(
-            r#"
-            SELECT * FROM tasks
-            WHERE {}
-            "#,
-            where_statement
-        );
+        if let Some(filter) = input.filter {
+            query.push_str(format!("WHERE {} ", filter.compile_sql()).as_str());
+        }
 
         if let Some(sort_by) = input.sort_by {
             query.push_str(format!("ORDER BY {} ", sort_by).as_str());
@@ -349,6 +346,8 @@ impl TaskOperations for Engine<Postgres> {
         if let Some(offset) = input.offset {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
+
+        println!("query: {}", query.as_str());
 
         let tasks_info = sqlx::query(query.as_str())
             .fetch_all(self.pool.as_ref())
