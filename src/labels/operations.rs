@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 use sqlx::{Postgres, Row};
 use uuid::Uuid;
