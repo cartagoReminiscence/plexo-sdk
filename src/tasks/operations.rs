@@ -1,57 +1,42 @@
-use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone, Utc};
-use sqlx::postgres::PgPoolOptions;
-use sqlx::types::time::OffsetDateTime;
-use sqlx::{Pool, Postgres};
+use async_trait::async_trait;
+use chrono::{DateTime, Utc};
+
+use derive_builder::Builder;
+use sqlx::Postgres;
+use strum_macros::{Display, EnumString};
 use uuid::Uuid;
 
+use crate::backend::engine::Engine;
 use crate::errors::sdk::SDKError;
 use crate::tasks::task::{Task, TaskPriority, TaskStatus};
 
-pub struct DateTimeBridge;
-
-impl DateTimeBridge {
-    pub fn to_string(date_time: DateTime<Utc>) -> String {
-        date_time.to_rfc3339()
-    }
-
-    pub fn from_string(date_time: String) -> DateTime<FixedOffset> {
-        DateTime::parse_from_rfc3339(&date_time).unwrap()
-    }
-
-    pub fn from_offset_date_time(offset_date_time: OffsetDateTime) -> DateTime<Utc> {
-        let naive_date_time =
-            NaiveDateTime::from_timestamp_millis(offset_date_time.unix_timestamp() * 1000).unwrap();
-
-        // TimeZone::from_utc_datetime(&Utc, &naive_date_time)
-        Utc.from_utc_datetime(&naive_date_time)
-        // DateTime::<Utc>::from_utc(naive_date_time, Utc)
-    }
-
-    pub fn from_date_time(date_time: DateTime<Utc>) -> OffsetDateTime {
-        OffsetDateTime::from_unix_timestamp(date_time.timestamp()).unwrap()
-    }
+#[async_trait]
+pub trait TaskOperations {
+    async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError>;
+    async fn get_task(&self, id: Uuid) -> Result<Task, SDKError>;
+    async fn update_task(&self, id: Uuid, input: UpdateTaskInput) -> Result<Task, SDKError>;
+    async fn delete_task(&self, id: Uuid) -> Result<Task, SDKError>;
+    async fn get_tasks(&self, input: GetTasksInput) -> Result<Vec<Task>, SDKError>;
 }
 
-struct CreateTaskInput {
+#[derive(Builder)]
+#[builder(pattern = "owned")]
+pub struct CreateTaskInput {
     owner_id: Uuid,
     status: TaskStatus,
     priority: TaskPriority,
     title: String,
-    description: Option<String>,
-    due_date: Option<DateTime<Utc>>,
-    project_id: Option<Uuid>,
-    lead_id: Option<Uuid>,
-    parent_id: Option<Uuid>,
+    description: String,
+    due_date: DateTime<Utc>,
+    project_id: Uuid,
+    lead_id: Uuid,
+    parent_id: Uuid,
 }
 
-async fn create_task(pool: Pool<Postgres>, input: CreateTaskInput) -> Result<Task, SDKError> {
-    // let pool = PgPoolOptions::new()
-    //     .max_connections(5)
-    //     .connect("postgres://postgres:password@localhost/test")
-    //     .await
-    //     .unwrap();
-
-    let task_final_info = sqlx::query!(r#"
+#[async_trait]
+impl TaskOperations for Engine<Postgres> {
+    async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError> {
+        let task_final_info = sqlx::query!(r#"
             INSERT INTO tasks (title, description, owner_id, status, priority, due_date, project_id, lead_id, parent_id)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
@@ -65,9 +50,110 @@ async fn create_task(pool: Pool<Postgres>, input: CreateTaskInput) -> Result<Tas
             input.project_id,
             input.lead_id,
             input.parent_id,
-        ).fetch_one(&pool)
-        .await
-        .unwrap();
+        ).fetch_one(self.pool.as_ref()).await?;
 
-    todo!()
+        let task = Task {
+            id: task_final_info.id,
+            created_at: task_final_info.created_at,
+            updated_at: task_final_info.updated_at,
+            title: task_final_info.title,
+            description: task_final_info.description,
+            status: TaskStatus::from_optional_str(&task_final_info.status),
+            priority: TaskPriority::from_optional_str(&task_final_info.priority),
+            due_date: task_final_info.due_date,
+            project_id: task_final_info.project_id,
+            lead_id: task_final_info.lead_id,
+            owner_id: task_final_info.owner_id,
+            count: task_final_info.count,
+            parent_id: task_final_info.parent_id,
+        };
+
+        Ok(task)
+    }
+
+    async fn get_task(&self, id: Uuid) -> Result<Task, SDKError> {
+        todo!()
+    }
+
+    async fn update_task(&self, id: Uuid, input: UpdateTaskInput) -> Result<Task, SDKError> {
+        todo!()
+    }
+
+    async fn delete_task(&self, id: Uuid) -> Result<Task, SDKError> {
+        todo!()
+    }
+
+    async fn get_tasks(&self, input: GetTasksInput) -> Result<Vec<Task>, SDKError> {
+        todo!()
+    }
+}
+
+#[derive(Builder)]
+#[builder(pattern = "owned")]
+pub struct UpdateTaskInput {
+    #[builder(setter(into, strip_option))]
+    status: Option<TaskStatus>,
+    #[builder(setter(into, strip_option))]
+    priority: Option<TaskPriority>,
+    #[builder(setter(into, strip_option))]
+    title: Option<String>,
+    #[builder(setter(into, strip_option))]
+    description: Option<String>,
+    #[builder(setter(into, strip_option))]
+    due_date: Option<DateTime<Utc>>,
+    #[builder(setter(into, strip_option))]
+    project_id: Option<Uuid>,
+    #[builder(setter(into, strip_option))]
+    lead_id: Option<Uuid>,
+    #[builder(setter(into, strip_option))]
+    parent_id: Option<Uuid>,
+}
+
+#[derive(Builder)]
+#[builder(pattern = "owned")]
+pub struct GetTasksBy {
+    #[builder(setter(into, strip_option))]
+    owner_id: Option<Uuid>,
+    #[builder(setter(into, strip_option))]
+    status: Option<TaskStatus>,
+    #[builder(setter(into, strip_option))]
+    priority: Option<TaskPriority>,
+    #[builder(setter(into, strip_option))]
+    title: Option<String>,
+    #[builder(setter(into, strip_option))]
+    description: Option<String>,
+    #[builder(setter(into, strip_option))]
+    due_date: Option<DateTime<Utc>>,
+    #[builder(setter(into, strip_option))]
+    project_id: Option<Uuid>,
+    #[builder(setter(into, strip_option))]
+    lead_id: Option<Uuid>,
+    #[builder(setter(into, strip_option))]
+    parent_id: Option<Uuid>,
+
+    #[builder(setter(into, strip_option))]
+    _and: Option<Vec<GetTasksBy>>,
+    #[builder(setter(into, strip_option))]
+    _or: Option<Vec<GetTasksBy>>,
+}
+
+pub enum SortOrder {
+    Asc,
+    Desc,
+}
+
+#[derive(Builder)]
+#[builder(pattern = "owned")]
+pub struct GetTasksInput {
+    task: GetTasksBy,
+
+    #[builder(setter(into, strip_option))]
+    sort_by: Option<String>,
+    #[builder(setter(into, strip_option))]
+    sort_order: Option<SortOrder>,
+
+    #[builder(setter(into, strip_option))]
+    limit: Option<i32>,
+    #[builder(setter(into, strip_option))]
+    offset: Option<i32>,
 }
