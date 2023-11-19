@@ -1,10 +1,14 @@
-use std::str::FromStr;
-
+use async_graphql::{Enum, SimpleObject};
 use chrono::{DateTime, Utc};
+
+use poem_openapi::Object;
 use strum_macros::{Display, EnumString};
 use uuid::Uuid;
 
-#[derive(Debug)]
+use poem_openapi::Enum as OpenApiEnum;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, SimpleObject, Object, Clone)]
 pub struct Task {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
@@ -28,8 +32,23 @@ pub struct Task {
     pub parent_id: Option<Uuid>,
 }
 
-#[derive(Clone, Debug, Display, EnumString)]
+#[derive(
+    Debug,
+    Enum,
+    OpenApiEnum,
+    Copy,
+    Clone,
+    Default,
+    Display,
+    EnumString,
+    Deserialize,
+    Serialize,
+    Eq,
+    PartialEq,
+)]
+
 pub enum TaskStatus {
+    #[default]
     None,
     Backlog,
     ToDo,
@@ -38,29 +57,26 @@ pub enum TaskStatus {
     Canceled,
 }
 
-impl TaskStatus {
-    pub fn from_optional_str(status: &Option<String>) -> Self {
-        match status {
-            Some(status) => TaskStatus::from_str(status.as_str()).unwrap(),
-            None => TaskStatus::None,
-        }
-    }
-}
+#[derive(
+    Debug,
+    Enum,
+    OpenApiEnum,
+    Copy,
+    Clone,
+    Default,
+    Display,
+    EnumString,
+    Deserialize,
+    Serialize,
+    Eq,
+    PartialEq,
+)]
 
-#[derive(Clone, Debug, Display, EnumString)]
 pub enum TaskPriority {
+    #[default]
     None,
     Low,
     Medium,
     High,
     Urgent,
-}
-
-impl TaskPriority {
-    pub fn from_optional_str(priority: &Option<String>) -> Self {
-        match priority {
-            Some(priority) => TaskPriority::from_str(priority.as_str()).unwrap(),
-            None => TaskPriority::None,
-        }
-    }
 }

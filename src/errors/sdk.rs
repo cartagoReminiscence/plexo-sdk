@@ -18,4 +18,6 @@ pub enum SDKError {
     // PoemError(#[from] poem::error::NotFoundError),
     #[error("SQLX error")]
     SQLXError(#[from] sqlx::Error),
+    // #[error("FromStr error")]
+    // FromStrError(#[from] core::str::FromStr::Err),
 }
