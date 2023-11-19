@@ -5,6 +5,7 @@ use plexo_sdk::{
     backend::engine::new_postgres_engine,
     tasks::{
         operations::{GetTasksByBuilder, GetTasksInputBuilder, TaskOperations},
+        relations::TaskRelations,
         task::TaskStatus,
     },
 };
@@ -35,7 +36,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let tasks = engine.get_tasks(tasks_filter).await?;
 
-    println!("Total tasks: {}", tasks.len());
+    let project = tasks.first().unwrap().project().await?;
+
+    println!("{:?}", project);
 
     Ok(())
 }

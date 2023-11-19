@@ -5,10 +5,10 @@ use chrono::{DateTime, Utc};
 
 use derive_builder::Builder;
 use sqlx::{Postgres, Row};
-use strum_macros::{Display, EnumString};
 use uuid::Uuid;
 
 use crate::backend::engine::Engine;
+use crate::common::commons::SortOrder;
 use crate::errors::sdk::SDKError;
 use crate::tasks::task::{Task, TaskPriority, TaskStatus};
 
@@ -98,12 +98,6 @@ pub struct GetTasksBy {
     pub _and: Option<Vec<GetTasksBy>>,
     #[builder(setter(strip_option), default)]
     pub _or: Option<Vec<GetTasksBy>>,
-}
-
-#[derive(Clone, Debug, Display, EnumString)]
-pub enum SortOrder {
-    Asc,
-    Desc,
 }
 
 impl GetTasksBy {
