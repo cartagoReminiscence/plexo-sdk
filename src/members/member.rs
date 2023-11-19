@@ -1,6 +1,13 @@
+use async_graphql::{Enum, SimpleObject};
 use chrono::{DateTime, Utc};
+use poem_openapi::Enum as OpenApiEnum;
+use poem_openapi::Object;
+use serde::{Deserialize, Serialize};
+use strum_macros::Display;
+use strum_macros::EnumString;
 use uuid::Uuid;
 
+#[derive(Debug, SimpleObject, Object, Clone)]
 pub struct Member {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
@@ -16,13 +23,28 @@ pub struct Member {
 
     pub photo_url: Option<String>,
 
-    // #[graphql(skip)]
+    #[graphql(skip)]
+    #[oai(skip)]
     pub password_hash: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(
+    Debug,
+    Enum,
+    OpenApiEnum,
+    Copy,
+    Clone,
+    Default,
+    Display,
+    EnumString,
+    Deserialize,
+    Serialize,
+    Eq,
+    PartialEq,
+)]
 pub enum MemberRole {
     Admin,
+    #[default]
     Member,
     ReadOnly,
 }
