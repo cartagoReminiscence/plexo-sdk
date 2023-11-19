@@ -1,0 +1,108 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE tasks\n            SET\n                status = COALESCE($1, status),\n                priority = COALESCE($2, priority),\n                title = COALESCE($3, title),\n                description = COALESCE($4, description),\n                due_date = COALESCE($5, due_date),\n                project_id = COALESCE($6, project_id),\n                lead_id = COALESCE($7, lead_id),\n                parent_id = COALESCE($8, parent_id)\n            WHERE id = $9\n            RETURNING *\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "owner_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "priority",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "due_date",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 9,
+        "name": "project_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "lead_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "labels",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 12,
+        "name": "count",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 13,
+        "name": "parent_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "ce4fad2dd9dbe99e93df5a26a419a50c1741e05cd8efec0c7a739f6047c4b0a9"
+}
