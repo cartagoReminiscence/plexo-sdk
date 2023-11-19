@@ -9,7 +9,7 @@ use crate::{backend::engine::Engine, common::commons::SortOrder, errors::sdk::SD
 use super::project::Project;
 
 #[async_trait]
-pub trait ProjectOperations {
+pub trait ProjectCrudOperations {
     async fn create_project(&self, input: CreateProjectInput) -> Result<Project, SDKError>;
     async fn get_project(&self, id: Uuid) -> Result<Project, SDKError>;
     async fn get_projects(&self, input: GetProjectsInput) -> Result<Vec<Project>, SDKError>;
@@ -53,7 +53,7 @@ pub struct UpdateProjectInput {
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct GetProjectsInput {
-    pub filter: GetProjectsBy,
+    pub filter: GetProjectsWhere,
 
     #[builder(setter(strip_option), default)]
     pub sort_by: Option<String>,
@@ -68,7 +68,7 @@ pub struct GetProjectsInput {
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
-pub struct GetProjectsBy {
+pub struct GetProjectsWhere {
     #[builder(setter(strip_option), default)]
     pub name: Option<String>,
     #[builder(setter(strip_option), default)]
@@ -85,12 +85,12 @@ pub struct GetProjectsBy {
     pub due_date: Option<DateTime<Utc>>,
 
     #[builder(setter(strip_option), default)]
-    pub _and: Option<Vec<GetProjectsBy>>,
+    pub _and: Option<Vec<GetProjectsWhere>>,
     #[builder(setter(strip_option), default)]
-    pub _or: Option<Vec<GetProjectsBy>>,
+    pub _or: Option<Vec<GetProjectsWhere>>,
 }
 
-impl GetProjectsBy {
+impl GetProjectsWhere {
     pub fn compile_sql(&self) -> String {
         let mut where_clause = String::new();
         if let Some(name) = &self.name {
@@ -137,7 +137,7 @@ impl GetProjectsBy {
 }
 
 #[async_trait]
-impl ProjectOperations for Engine<Postgres> {
+impl ProjectCrudOperations for Engine<Postgres> {
     async fn create_project(&self, input: CreateProjectInput) -> Result<Project, SDKError> {
         let project_final_info = sqlx::query_as!(
             Project,
