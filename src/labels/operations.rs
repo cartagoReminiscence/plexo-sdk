@@ -21,7 +21,10 @@ pub trait LabelCrudOperations {
 #[builder(pattern = "owned")]
 pub struct CreateLabelInput {
     pub name: String,
+
+    #[builder(setter(strip_option), default)]
     pub description: Option<String>,
+    #[builder(setter(strip_option), default)]
     pub color: Option<String>,
 }
 

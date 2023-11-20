@@ -26,9 +26,14 @@ pub struct CreateMemberInput {
     name: String,
     email: String,
     role: MemberRole,
+
+    #[builder(setter(strip_option), default)]
     github_id: Option<String>,
+    #[builder(setter(strip_option), default)]
     google_id: Option<String>,
+    #[builder(setter(strip_option), default)]
     photo_url: Option<String>,
+    #[builder(setter(strip_option), default)]
     password_hash: Option<String>,
 }
 

@@ -15,20 +15,16 @@ pub struct Task {
     pub updated_at: DateTime<Utc>,
 
     pub title: String,
-    pub description: Option<String>,
-
     pub owner_id: Uuid,
-
     pub status: TaskStatus,
     pub priority: TaskPriority,
 
-    pub due_date: Option<DateTime<Utc>>,
-
-    pub project_id: Option<Uuid>,
-    pub lead_id: Option<Uuid>,
-
     pub count: i32,
 
+    pub description: Option<String>,
+    pub due_date: Option<DateTime<Utc>>,
+    pub project_id: Option<Uuid>,
+    pub lead_id: Option<Uuid>,
     pub parent_id: Option<Uuid>,
 }
 

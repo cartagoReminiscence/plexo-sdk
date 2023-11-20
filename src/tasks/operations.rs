@@ -42,15 +42,24 @@ pub struct GetTasksInput {
 #[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateTaskInput {
-    pub owner_id: Uuid,
-    pub status: TaskStatus,
-    pub priority: TaskPriority,
     pub title: String,
-    pub description: String,
-    pub due_date: DateTime<Utc>,
-    pub project_id: Uuid,
-    pub lead_id: Uuid,
-    pub parent_id: Uuid,
+    pub owner_id: Uuid,
+
+    #[builder(setter(strip_option), default)]
+    pub status: Option<TaskStatus>,
+    #[builder(setter(strip_option), default)]
+    pub priority: Option<TaskPriority>,
+
+    #[builder(setter(strip_option), default)]
+    pub description: Option<String>,
+    #[builder(setter(strip_option), default)]
+    pub due_date: Option<DateTime<Utc>>,
+    #[builder(setter(strip_option), default)]
+    pub project_id: Option<Uuid>,
+    #[builder(setter(strip_option), default)]
+    pub lead_id: Option<Uuid>,
+    #[builder(setter(strip_option), default)]
+    pub parent_id: Option<Uuid>,
 }
 
 #[derive(Default, Builder, InputObject)]
@@ -167,8 +176,8 @@ impl TaskCrudOperations for SDKEngine {
             input.title,
             input.description,
             input.owner_id,
-            input.status.to_string(),
-            input.priority.to_string(),
+            input.status.unwrap_or_default().to_string(),
+            input.priority.unwrap_or_default().to_string(),
             input.due_date,
             input.project_id,
             input.lead_id,

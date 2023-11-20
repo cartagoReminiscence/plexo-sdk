@@ -26,11 +26,17 @@ pub trait ProjectCrudOperations {
 #[builder(pattern = "owned")]
 pub struct CreateProjectInput {
     pub name: String,
-    pub prefix: Option<String>,
     pub owner_id: Uuid,
+
+    #[builder(setter(strip_option), default)]
+    pub prefix: Option<String>,
+    #[builder(setter(strip_option), default)]
     pub description: Option<String>,
+    #[builder(setter(strip_option), default)]
     pub lead_id: Option<Uuid>,
+    #[builder(setter(strip_option), default)]
     pub start_date: Option<DateTime<Utc>>,
+    #[builder(setter(strip_option), default)]
     pub due_date: Option<DateTime<Utc>>,
 }
 
@@ -54,7 +60,8 @@ pub struct UpdateProjectInput {
 #[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetProjectsInput {
-    pub filter: GetProjectsWhere,
+    #[builder(setter(strip_option), default)]
+    pub filter: Option<GetProjectsWhere>,
 
     #[builder(setter(strip_option), default)]
     pub sort_by: Option<String>,
@@ -212,15 +219,11 @@ impl ProjectCrudOperations for SDKEngine {
     }
 
     async fn get_projects(&self, input: GetProjectsInput) -> Result<Vec<Project>, SDKError> {
-        let where_statement = input.filter.compile_sql();
+        let mut query = "SELECT * FROM projects ".to_string();
 
-        let mut query = format!(
-            r#"
-            SELECT * FROM projects
-            WHERE {}
-            "#,
-            where_statement
-        );
+        if let Some(filter) = input.filter {
+            query.push_str(format!("WHERE {} ", filter.compile_sql()).as_str());
+        }
 
         if let Some(sort_by) = input.sort_by {
             query.push_str(format!("ORDER BY {} ", sort_by).as_str());

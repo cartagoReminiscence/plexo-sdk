@@ -26,6 +26,7 @@ pub struct CreateTeamInput {
     pub name: String,
     pub owner_id: Uuid,
     pub visibility: TeamVisibility,
+
     #[builder(setter(strip_option), default)]
     pub prefix: Option<String>,
 }
