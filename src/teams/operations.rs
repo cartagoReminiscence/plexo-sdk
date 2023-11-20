@@ -24,6 +24,8 @@ pub trait TeamCrudOperations {
 #[builder(pattern = "owned")]
 pub struct CreateTeamInput {
     pub name: String,
+
+    #[graphql(skip)]
     pub owner_id: Uuid,
     pub visibility: TeamVisibility,
 

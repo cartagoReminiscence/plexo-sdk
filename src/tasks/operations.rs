@@ -43,6 +43,8 @@ pub struct GetTasksInput {
 #[builder(pattern = "owned")]
 pub struct CreateTaskInput {
     pub title: String,
+
+    #[graphql(skip)]
     pub owner_id: Uuid,
 
     #[builder(setter(strip_option), default)]

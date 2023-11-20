@@ -26,6 +26,8 @@ pub trait ProjectCrudOperations {
 #[builder(pattern = "owned")]
 pub struct CreateProjectInput {
     pub name: String,
+
+    #[graphql(skip)]
     pub owner_id: Uuid,
 
     #[builder(setter(strip_option), default)]
