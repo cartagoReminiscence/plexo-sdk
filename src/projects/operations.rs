@@ -1,10 +1,10 @@
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
-use sqlx::{Postgres, Row};
+use sqlx::{Row};
 use uuid::Uuid;
 
-use crate::{backend::engine::Engine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
 
 use super::project::Project;
 
@@ -137,7 +137,7 @@ impl GetProjectsWhere {
 }
 
 #[async_trait]
-impl ProjectCrudOperations for Engine<Postgres> {
+impl ProjectCrudOperations for SDKEngine {
     async fn create_project(&self, input: CreateProjectInput) -> Result<Project, SDKError> {
         let project_final_info = sqlx::query_as!(
             Project,

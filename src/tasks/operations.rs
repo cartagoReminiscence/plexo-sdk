@@ -4,10 +4,10 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 
 use derive_builder::Builder;
-use sqlx::{Postgres, Row};
+use sqlx::Row;
 use uuid::Uuid;
 
-use crate::backend::engine::Engine;
+use crate::backend::engine::SDKEngine;
 use crate::common::commons::SortOrder;
 use crate::errors::sdk::SDKError;
 use crate::tasks::task::{Task, TaskPriority, TaskStatus};
@@ -156,7 +156,7 @@ impl GetTasksWhere {
 }
 
 #[async_trait]
-impl TaskCrudOperations for Engine<Postgres> {
+impl TaskCrudOperations for SDKEngine {
     async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError> {
         let task_final_info = sqlx::query!(r#"
             INSERT INTO tasks (title, description, owner_id, status, priority, due_date, project_id, lead_id, parent_id)

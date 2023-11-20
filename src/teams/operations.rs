@@ -3,10 +3,10 @@ use std::str::FromStr;
 use async_trait::async_trait;
 
 use derive_builder::Builder;
-use sqlx::{Postgres, Row};
+use sqlx::{Row};
 use uuid::Uuid;
 
-use crate::{backend::engine::Engine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
 
 use super::team::{Team, TeamVisibility};
 
@@ -129,7 +129,7 @@ impl GetTeamsWhere {
 }
 
 #[async_trait]
-impl TeamCrudOperations for Engine<Postgres> {
+impl TeamCrudOperations for SDKEngine {
     async fn create_team(&self, input: CreateTeamInput) -> Result<Team, SDKError> {
         let team_final_info = sqlx::query!(
             r#"

@@ -3,10 +3,10 @@ use std::str::FromStr;
 use async_trait::async_trait;
 
 use derive_builder::Builder;
-use sqlx::{Postgres, Row};
+use sqlx::{Row};
 use uuid::Uuid;
 
-use crate::{backend::engine::Engine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
 
 use super::member::{Member, MemberRole};
 
@@ -140,7 +140,7 @@ impl GetMembersWhere {
 }
 
 #[async_trait]
-impl MemberCrudOperations for Engine<Postgres> {
+impl MemberCrudOperations for SDKEngine {
     async fn create_member(&self, input: CreateMemberInput) -> Result<Member, SDKError> {
         let member_final_info = sqlx::query!(
             r#"

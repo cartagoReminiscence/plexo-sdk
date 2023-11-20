@@ -1,9 +1,9 @@
 use async_trait::async_trait;
 use derive_builder::Builder;
-use sqlx::{Postgres, Row};
+use sqlx::{Row};
 use uuid::Uuid;
 
-use crate::{backend::engine::Engine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
 
 use super::label::Label;
 
@@ -110,7 +110,7 @@ impl GetLabelsWhere {
 }
 
 #[async_trait]
-impl LabelCrudOperations for Engine<Postgres> {
+impl LabelCrudOperations for SDKEngine {
     async fn create_label(&self, input: CreateLabelInput) -> Result<Label, SDKError> {
         let label_info = sqlx::query!(
             r#"
