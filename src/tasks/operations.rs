@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use async_graphql::InputObject;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 
@@ -21,7 +22,7 @@ pub trait TaskCrudOperations {
     async fn delete_task(&self, id: Uuid) -> Result<Task, SDKError>;
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTasksInput {
     #[builder(setter(strip_option), default)]
@@ -38,7 +39,7 @@ pub struct GetTasksInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateTaskInput {
     pub owner_id: Uuid,
@@ -52,7 +53,7 @@ pub struct CreateTaskInput {
     pub parent_id: Uuid,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateTaskInput {
     #[builder(setter(strip_option), default)]
@@ -73,7 +74,7 @@ pub struct UpdateTaskInput {
     pub parent_id: Option<Uuid>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTasksWhere {
     #[builder(setter(strip_option), default)]

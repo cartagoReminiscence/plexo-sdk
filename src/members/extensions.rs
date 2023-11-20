@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
 
@@ -21,7 +22,7 @@ pub trait MembersExtensionOperations {
     async fn get_member_by_email(&self, email: String) -> Result<Member, SDKError>;
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateMemberFromGithubInput {
     github_id: String,
@@ -30,7 +31,7 @@ pub struct CreateMemberFromGithubInput {
     photo_url: Option<String>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateMemberFromEmailInput {
     email: String,

@@ -1,6 +1,22 @@
+use async_graphql::Enum;
+use poem_openapi::Enum as OpenApiEnum;
+use serde::{Deserialize, Serialize};
 use strum_macros::{Display, EnumString};
 
-#[derive(Debug, Default, Clone, Display, EnumString)]
+#[derive(
+    Debug,
+    Enum,
+    OpenApiEnum,
+    Copy,
+    Clone,
+    Default,
+    Display,
+    EnumString,
+    Deserialize,
+    Serialize,
+    Eq,
+    PartialEq,
+)]
 pub enum SortOrder {
     #[default]
     Asc,

@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
 use sqlx::Row;
@@ -16,7 +17,7 @@ pub trait LabelCrudOperations {
     async fn delete_label(&self, id: Uuid) -> Result<Label, SDKError>;
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateLabelInput {
     pub name: String,
@@ -24,7 +25,7 @@ pub struct CreateLabelInput {
     pub color: Option<String>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateLabelInput {
     #[builder(setter(strip_option), default)]
@@ -35,7 +36,7 @@ pub struct UpdateLabelInput {
     pub color: Option<String>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetLabelsInput {
     #[builder(setter(strip_option), default)]
@@ -52,7 +53,7 @@ pub struct GetLabelsInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetLabelsWhere {
     #[builder(setter(strip_option), default)]

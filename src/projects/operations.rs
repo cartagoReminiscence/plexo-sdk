@@ -1,3 +1,4 @@
+use async_graphql::InputObject;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
@@ -21,7 +22,7 @@ pub trait ProjectCrudOperations {
     async fn delete_project(&self, id: Uuid) -> Result<Project, SDKError>;
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateProjectInput {
     pub name: String,
@@ -33,7 +34,7 @@ pub struct CreateProjectInput {
     pub due_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateProjectInput {
     #[builder(setter(strip_option), default)]
@@ -50,7 +51,7 @@ pub struct UpdateProjectInput {
     pub due_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetProjectsInput {
     pub filter: GetProjectsWhere,
@@ -66,7 +67,7 @@ pub struct GetProjectsInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Builder)]
+#[derive(Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetProjectsWhere {
     #[builder(setter(strip_option), default)]
