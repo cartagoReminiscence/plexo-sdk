@@ -1,9 +1,10 @@
 use std::str::FromStr;
 
+use async_graphql::InputObject;
 use async_trait::async_trait;
 
 use derive_builder::Builder;
-use sqlx::{Row};
+use sqlx::Row;
 use uuid::Uuid;
 
 use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
@@ -19,16 +20,17 @@ pub trait TeamCrudOperations {
     async fn delete_team(&self, id: Uuid) -> Result<Team, SDKError>;
 }
 
-#[derive(Builder)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateTeamInput {
     pub name: String,
     pub owner_id: Uuid,
     pub visibility: TeamVisibility,
+    #[builder(setter(strip_option), default)]
     pub prefix: Option<String>,
 }
 
-#[derive(Builder)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateTeamInput {
     #[builder(setter(strip_option), default)]
@@ -41,7 +43,7 @@ pub struct UpdateTeamInput {
     pub prefix: Option<String>,
 }
 
-#[derive(Builder)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTeamsInput {
     #[builder(setter(strip_option), default)]
@@ -58,7 +60,7 @@ pub struct GetTeamsInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Builder)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTeamsWhere {
     #[builder(setter(strip_option), default)]

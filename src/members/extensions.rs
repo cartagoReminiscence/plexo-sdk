@@ -22,7 +22,7 @@ pub trait MembersExtensionOperations {
     async fn get_member_by_email(&self, email: String) -> Result<Member, SDKError>;
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateMemberFromGithubInput {
     github_id: String,
@@ -31,7 +31,7 @@ pub struct CreateMemberFromGithubInput {
     photo_url: Option<String>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateMemberFromEmailInput {
     email: String,

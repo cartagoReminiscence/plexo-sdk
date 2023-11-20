@@ -22,7 +22,7 @@ pub trait TaskCrudOperations {
     async fn delete_task(&self, id: Uuid) -> Result<Task, SDKError>;
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTasksInput {
     #[builder(setter(strip_option), default)]
@@ -39,7 +39,7 @@ pub struct GetTasksInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateTaskInput {
     pub owner_id: Uuid,
@@ -53,7 +53,7 @@ pub struct CreateTaskInput {
     pub parent_id: Uuid,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateTaskInput {
     #[builder(setter(strip_option), default)]
@@ -74,7 +74,7 @@ pub struct UpdateTaskInput {
     pub parent_id: Option<Uuid>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTasksWhere {
     #[builder(setter(strip_option), default)]
@@ -347,8 +347,6 @@ impl TaskCrudOperations for SDKEngine {
         if let Some(offset) = input.offset {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
-
-        println!("query: {}", query.as_str());
 
         let tasks_info = sqlx::query(query.as_str())
             .fetch_all(self.pool.as_ref())

@@ -22,7 +22,7 @@ pub trait ProjectCrudOperations {
     async fn delete_project(&self, id: Uuid) -> Result<Project, SDKError>;
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateProjectInput {
     pub name: String,
@@ -34,7 +34,7 @@ pub struct CreateProjectInput {
     pub due_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateProjectInput {
     #[builder(setter(strip_option), default)]
@@ -51,7 +51,7 @@ pub struct UpdateProjectInput {
     pub due_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetProjectsInput {
     pub filter: GetProjectsWhere,
@@ -67,7 +67,7 @@ pub struct GetProjectsInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetProjectsWhere {
     #[builder(setter(strip_option), default)]

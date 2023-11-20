@@ -20,7 +20,7 @@ pub trait MemberCrudOperations {
     async fn delete_member(&self, id: Uuid) -> Result<Member, SDKError>;
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateMemberInput {
     name: String,
@@ -32,7 +32,7 @@ pub struct CreateMemberInput {
     password_hash: Option<String>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateMemberInput {
     #[builder(setter(strip_option), default)]
@@ -51,7 +51,7 @@ pub struct UpdateMemberInput {
     password_hash: Option<String>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetMembersInput {
     #[builder(setter(strip_option), default)]
@@ -68,7 +68,7 @@ pub struct GetMembersInput {
     offset: Option<i32>,
 }
 
-#[derive(Builder, InputObject)]
+#[derive(Default, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetMembersWhere {
     #[builder(setter(strip_option), default)]
