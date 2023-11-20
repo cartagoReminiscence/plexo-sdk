@@ -2,10 +2,9 @@ use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 use crate::errors::sdk::SDKError;
 
+#[derive(Clone)]
 pub struct SDKEngine {
     pub pool: Box<Pool<Postgres>>,
-    // pub subscription_manager: SubscriptionManager,
-    // pub auto_suggestions_engine: AutoSuggestionsEngine,
 }
 
 pub async fn new_postgres_engine(database_url: &str) -> Result<SDKEngine, SDKError> {
