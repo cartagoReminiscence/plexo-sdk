@@ -3,7 +3,7 @@ use std::str::FromStr;
 use async_trait::async_trait;
 
 use derive_builder::Builder;
-use sqlx::{Row};
+use sqlx::Row;
 use uuid::Uuid;
 
 use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
@@ -22,71 +22,71 @@ pub trait MemberCrudOperations {
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct CreateMemberInput {
-    pub name: String,
-    pub email: String,
-    pub role: MemberRole,
-    pub github_id: Option<String>,
-    pub google_id: Option<String>,
-    pub photo_url: Option<String>,
-    pub password_hash: Option<String>,
+    name: String,
+    email: String,
+    role: MemberRole,
+    github_id: Option<String>,
+    google_id: Option<String>,
+    photo_url: Option<String>,
+    password_hash: Option<String>,
 }
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct UpdateMemberInput {
     #[builder(setter(strip_option), default)]
-    pub name: Option<String>,
+    name: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub email: Option<String>,
+    email: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub role: Option<MemberRole>,
+    role: Option<MemberRole>,
     #[builder(setter(strip_option), default)]
-    pub github_id: Option<String>,
+    github_id: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub google_id: Option<String>,
+    google_id: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub photo_url: Option<String>,
+    photo_url: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub password_hash: Option<String>,
+    password_hash: Option<String>,
 }
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct GetMembersInput {
     #[builder(setter(strip_option), default)]
-    pub filter: Option<GetMembersWhere>,
+    filter: Option<GetMembersWhere>,
 
     #[builder(setter(strip_option), default)]
-    pub sort_by: Option<String>,
+    sort_by: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub sort_order: Option<SortOrder>,
+    sort_order: Option<SortOrder>,
 
     #[builder(setter(into, strip_option), default = "Some(100)")]
-    pub limit: Option<i32>,
+    limit: Option<i32>,
     #[builder(setter(into, strip_option), default = "Some(0)")]
-    pub offset: Option<i32>,
+    offset: Option<i32>,
 }
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct GetMembersWhere {
     #[builder(setter(strip_option), default)]
-    pub name: Option<String>,
+    name: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub email: Option<String>,
+    email: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub role: Option<MemberRole>,
+    role: Option<MemberRole>,
     #[builder(setter(strip_option), default)]
-    pub github_id: Option<String>,
+    github_id: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub google_id: Option<String>,
+    google_id: Option<String>,
     #[builder(setter(strip_option), default)]
-    pub photo_url: Option<String>,
+    photo_url: Option<String>,
 
     #[builder(setter(strip_option), default)]
-    pub _and: Option<Vec<GetMembersWhere>>,
+    _and: Option<Vec<GetMembersWhere>>,
     #[builder(setter(strip_option), default)]
-    pub _or: Option<Vec<GetMembersWhere>>,
+    _or: Option<Vec<GetMembersWhere>>,
 }
 
 impl GetMembersWhere {

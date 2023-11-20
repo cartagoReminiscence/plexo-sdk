@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use derive_builder::Builder;
-use sqlx::{Row};
+use sqlx::Row;
 use uuid::Uuid;
 
 use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
