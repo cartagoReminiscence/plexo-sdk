@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .limit(10)
         .build()?;
 
-    let tasks = engine.get_tasks(tasks_filter).await?;
+    let tasks = engine.get_tasks(Some(tasks_filter)).await?;
 
     println!("total tasks: {}", tasks.len());
 

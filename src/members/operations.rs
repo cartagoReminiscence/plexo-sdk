@@ -4,6 +4,7 @@ use async_graphql::InputObject;
 use async_trait::async_trait;
 
 use derive_builder::Builder;
+use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -20,7 +21,7 @@ pub trait MemberCrudOperations {
     async fn delete_member(&self, id: Uuid) -> Result<Member, SDKError>;
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateMemberInput {
     name: String,
@@ -37,7 +38,7 @@ pub struct CreateMemberInput {
     password_hash: Option<String>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateMemberInput {
     #[builder(setter(strip_option), default)]
@@ -56,7 +57,7 @@ pub struct UpdateMemberInput {
     password_hash: Option<String>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetMembersInput {
     #[builder(setter(strip_option), default)]
@@ -73,7 +74,7 @@ pub struct GetMembersInput {
     offset: Option<i32>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetMembersWhere {
     #[builder(setter(strip_option), default)]

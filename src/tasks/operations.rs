@@ -5,6 +5,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 
 use derive_builder::Builder;
+use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -17,12 +18,12 @@ use crate::tasks::task::{Task, TaskPriority, TaskStatus};
 pub trait TaskCrudOperations {
     async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError>;
     async fn get_task(&self, id: Uuid) -> Result<Task, SDKError>;
-    async fn get_tasks(&self, input: GetTasksInput) -> Result<Vec<Task>, SDKError>;
+    async fn get_tasks(&self, input: Option<GetTasksInput>) -> Result<Vec<Task>, SDKError>;
     async fn update_task(&self, id: Uuid, input: UpdateTaskInput) -> Result<Task, SDKError>;
     async fn delete_task(&self, id: Uuid) -> Result<Task, SDKError>;
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTasksInput {
     #[builder(setter(strip_option), default)]
@@ -39,7 +40,7 @@ pub struct GetTasksInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateTaskInput {
     pub title: String,
@@ -64,7 +65,7 @@ pub struct CreateTaskInput {
     pub parent_id: Option<Uuid>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateTaskInput {
     #[builder(setter(strip_option), default)]
@@ -85,7 +86,7 @@ pub struct UpdateTaskInput {
     pub parent_id: Option<Uuid>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTasksWhere {
     #[builder(setter(strip_option), default)]
@@ -336,28 +337,35 @@ impl TaskCrudOperations for SDKEngine {
         Ok(task)
     }
 
-    async fn get_tasks(&self, input: GetTasksInput) -> Result<Vec<Task>, SDKError> {
+    async fn get_tasks(&self, input: Option<GetTasksInput>) -> Result<Vec<Task>, SDKError> {
         let mut query = "SELECT * FROM tasks ".to_string();
 
-        if let Some(filter) = input.filter {
-            query.push_str(format!("WHERE {} ", filter.compile_sql()).as_str());
-        }
+        let query = match input {
+            Some(input) => {
+                if let Some(filter) = input.filter {
+                    query.push_str(format!("WHERE {} ", filter.compile_sql()).as_str());
+                }
 
-        if let Some(sort_by) = input.sort_by {
-            query.push_str(format!("ORDER BY {} ", sort_by).as_str());
-        }
+                if let Some(sort_by) = input.sort_by {
+                    query.push_str(format!("ORDER BY {} ", sort_by).as_str());
+                }
 
-        if let Some(sort_order) = input.sort_order {
-            query.push_str(format!("{} ", sort_order).as_str());
-        }
+                if let Some(sort_order) = input.sort_order {
+                    query.push_str(format!("{} ", sort_order).as_str());
+                }
 
-        if let Some(limit) = input.limit {
-            query.push_str(format!("LIMIT {} ", limit).as_str());
-        }
+                if let Some(limit) = input.limit {
+                    query.push_str(format!("LIMIT {} ", limit).as_str());
+                }
 
-        if let Some(offset) = input.offset {
-            query.push_str(format!("OFFSET {} ", offset).as_str());
-        }
+                if let Some(offset) = input.offset {
+                    query.push_str(format!("OFFSET {} ", offset).as_str());
+                }
+
+                query
+            }
+            None => query,
+        };
 
         let tasks_info = sqlx::query(query.as_str())
             .fetch_all(self.pool.as_ref())
