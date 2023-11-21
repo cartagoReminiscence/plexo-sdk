@@ -4,6 +4,7 @@ use async_graphql::InputObject;
 use async_trait::async_trait;
 
 use derive_builder::Builder;
+use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -20,7 +21,7 @@ pub trait TeamCrudOperations {
     async fn delete_team(&self, id: Uuid) -> Result<Team, SDKError>;
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Object, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateTeamInput {
     pub name: String,
@@ -33,7 +34,7 @@ pub struct CreateTeamInput {
     pub prefix: Option<String>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Object, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateTeamInput {
     #[builder(setter(strip_option), default)]
@@ -46,7 +47,7 @@ pub struct UpdateTeamInput {
     pub prefix: Option<String>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Object, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTeamsInput {
     #[builder(setter(strip_option), default)]
@@ -63,7 +64,7 @@ pub struct GetTeamsInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Object, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct GetTeamsWhere {
     #[builder(setter(strip_option), default)]
