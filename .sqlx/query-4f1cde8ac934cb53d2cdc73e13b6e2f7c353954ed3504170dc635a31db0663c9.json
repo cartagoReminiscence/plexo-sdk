@@ -52,6 +52,11 @@
         "ordinal": 9,
         "name": "due_date",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "status",
+        "type_info": "Varchar"
       }
     ],
     "parameters": {
@@ -66,6 +71,7 @@
       false,
       true,
       false,
+      true,
       true,
       true,
       true,

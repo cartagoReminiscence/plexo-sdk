@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            INSERT INTO projects (name, description, owner_id)\n            VALUES ($1, $2, $3)\n            RETURNING *\n            ",
+  "query": "\n            INSERT INTO projects (name, description, owner_id, status)\n            VALUES ($1, $2, $3, $4)\n            RETURNING *\n            ",
   "describe": {
     "columns": [
       {
@@ -52,13 +52,19 @@
         "ordinal": 9,
         "name": "due_date",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "status",
+        "type_info": "Varchar"
       }
     ],
     "parameters": {
       "Left": [
         "Text",
         "Text",
-        "Uuid"
+        "Uuid",
+        "Varchar"
       ]
     },
     "nullable": [
@@ -71,8 +77,9 @@
       true,
       true,
       true,
+      true,
       true
     ]
   },
-  "hash": "8cd21dfec1fc3f6457bea9033d1a62d7c57a24f4a119b76c40fb0fffa8fabb5d"
+  "hash": "c86eb98cce37e3e0679c1082faedb0dfb0917ee9fe774de735454e2518870e89"
 }

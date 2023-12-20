@@ -3,6 +3,12 @@ use chrono::{DateTime, Utc};
 use poem_openapi::Object;
 use uuid::Uuid;
 
+use async_graphql::Enum;
+
+use strum_macros::{Display, EnumString};
+
+use poem_openapi::Enum as OpenApiEnum;
+use serde::{Deserialize, Serialize};
 #[derive(Debug, SimpleObject, Object, Clone)]
 pub struct Project {
     pub id: Uuid,
@@ -10,12 +16,38 @@ pub struct Project {
     pub updated_at: DateTime<Utc>,
 
     pub name: String,
-    pub prefix: Option<String>,
-
+    pub status: ProjectStatus,
     pub owner_id: Uuid,
+
+    pub prefix: Option<String>,
     pub description: Option<String>,
 
     pub lead_id: Option<Uuid>,
     pub start_date: Option<DateTime<Utc>>,
     pub due_date: Option<DateTime<Utc>>,
+}
+
+#[derive(
+    Debug,
+    Enum,
+    OpenApiEnum,
+    Copy,
+    Clone,
+    Default,
+    Display,
+    EnumString,
+    Deserialize,
+    Serialize,
+    Eq,
+    PartialEq,
+)]
+
+pub enum ProjectStatus {
+    #[default]
+    None,
+    Backlog,
+    ToDo,
+    InProgress,
+    Done,
+    Canceled,
 }

@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use async_graphql::InputObject;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
@@ -8,7 +10,7 @@ use uuid::Uuid;
 
 use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
 
-use super::project::Project;
+use super::project::{Project, ProjectStatus};
 
 #[async_trait]
 pub trait ProjectCrudOperations {
@@ -30,6 +32,9 @@ pub struct CreateProjectInput {
 
     #[graphql(skip)]
     pub owner_id: Uuid,
+
+    #[builder(setter(strip_option), default)]
+    pub status: Option<ProjectStatus>,
 
     #[builder(setter(strip_option), default)]
     pub prefix: Option<String>,
@@ -150,26 +155,40 @@ impl GetProjectsWhere {
 #[async_trait]
 impl ProjectCrudOperations for SDKEngine {
     async fn create_project(&self, input: CreateProjectInput) -> Result<Project, SDKError> {
-        let project_final_info = sqlx::query_as!(
-            Project,
+        let project_final_info = sqlx::query!(
             r#"
-            INSERT INTO projects (name, description, owner_id)
-            VALUES ($1, $2, $3)
+            INSERT INTO projects (name, description, owner_id, status)
+            VALUES ($1, $2, $3, $4)
             RETURNING *
             "#,
             input.name,
             input.description,
             input.owner_id,
+            input.status.unwrap_or_default().to_string(),
         )
         .fetch_one(self.pool.as_ref())
         .await?;
 
-        Ok(project_final_info)
+        Ok(Project {
+            id: project_final_info.id,
+            created_at: project_final_info.created_at,
+            updated_at: project_final_info.updated_at,
+            name: project_final_info.name,
+            prefix: project_final_info.prefix,
+            owner_id: project_final_info.owner_id,
+            description: project_final_info.description,
+            lead_id: project_final_info.lead_id,
+            start_date: project_final_info.start_date,
+            due_date: project_final_info.due_date,
+            status: project_final_info
+                .status
+                .and_then(|a| ProjectStatus::from_str(&a).ok())
+                .unwrap_or_default(),
+        })
     }
 
     async fn get_project(&self, id: Uuid) -> Result<Project, SDKError> {
-        let project_info = sqlx::query_as!(
-            Project,
+        let project_info = sqlx::query!(
             r#"
             SELECT * FROM projects WHERE id = $1
             "#,
@@ -178,7 +197,22 @@ impl ProjectCrudOperations for SDKEngine {
         .fetch_one(self.pool.as_ref())
         .await?;
 
-        Ok(project_info)
+        Ok(Project {
+            id: project_info.id,
+            created_at: project_info.created_at,
+            updated_at: project_info.updated_at,
+            name: project_info.name,
+            prefix: project_info.prefix,
+            owner_id: project_info.owner_id,
+            description: project_info.description,
+            lead_id: project_info.lead_id,
+            start_date: project_info.start_date,
+            due_date: project_info.due_date,
+            status: project_info
+                .status
+                .and_then(|a| ProjectStatus::from_str(&a).ok())
+                .unwrap_or_default(),
+        })
     }
 
     async fn update_project(
@@ -186,8 +220,7 @@ impl ProjectCrudOperations for SDKEngine {
         id: Uuid,
         input: UpdateProjectInput,
     ) -> Result<Project, SDKError> {
-        let project_final_info = sqlx::query_as!(
-            Project,
+        let project_final_info = sqlx::query!(
             r#"
             UPDATE projects
             SET
@@ -203,12 +236,26 @@ impl ProjectCrudOperations for SDKEngine {
         .fetch_one(self.pool.as_ref())
         .await?;
 
-        Ok(project_final_info)
+        Ok(Project {
+            id: project_final_info.id,
+            created_at: project_final_info.created_at,
+            updated_at: project_final_info.updated_at,
+            name: project_final_info.name,
+            prefix: project_final_info.prefix,
+            owner_id: project_final_info.owner_id,
+            description: project_final_info.description,
+            lead_id: project_final_info.lead_id,
+            start_date: project_final_info.start_date,
+            due_date: project_final_info.due_date,
+            status: project_final_info
+                .status
+                .and_then(|a| ProjectStatus::from_str(&a).ok())
+                .unwrap_or_default(),
+        })
     }
 
     async fn delete_project(&self, id: Uuid) -> Result<Project, SDKError> {
-        let project_info = sqlx::query_as!(
-            Project,
+        let project_info = sqlx::query!(
             r#"
             DELETE FROM projects WHERE id = $1
             RETURNING *
@@ -218,7 +265,22 @@ impl ProjectCrudOperations for SDKEngine {
         .fetch_one(self.pool.as_ref())
         .await?;
 
-        Ok(project_info)
+        Ok(Project {
+            id: project_info.id,
+            created_at: project_info.created_at,
+            updated_at: project_info.updated_at,
+            name: project_info.name,
+            prefix: project_info.prefix,
+            owner_id: project_info.owner_id,
+            description: project_info.description,
+            lead_id: project_info.lead_id,
+            start_date: project_info.start_date,
+            due_date: project_info.due_date,
+            status: project_info
+                .status
+                .and_then(|a| ProjectStatus::from_str(&a).ok())
+                .unwrap_or_default(),
+        })
     }
 
     async fn get_projects(&self, input: GetProjectsInput) -> Result<Vec<Project>, SDKError> {
@@ -261,6 +323,10 @@ impl ProjectCrudOperations for SDKEngine {
                 lead_id: x.get("lead_id"),
                 start_date: x.get("start_date"),
                 due_date: x.get("due_date"),
+                status: x
+                    .get::<'_, Option<String>, _>("status")
+                    .and_then(|a| ProjectStatus::from_str(&a).ok())
+                    .unwrap_or_default(),
             })
             .collect::<Vec<Project>>();
 
