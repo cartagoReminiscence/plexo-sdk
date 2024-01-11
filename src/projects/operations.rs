@@ -10,7 +10,7 @@ use uuid::Uuid;
 
 use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
 
-use super::project::{Project, ProjectStatus};
+use super::project::{Project, ProjectStatus, ProjectVisibility};
 
 #[async_trait]
 pub trait ProjectCrudOperations {
@@ -184,6 +184,10 @@ impl ProjectCrudOperations for SDKEngine {
                 .status
                 .and_then(|a| ProjectStatus::from_str(&a).ok())
                 .unwrap_or_default(),
+            visibility: project_final_info
+                .visibility
+                .and_then(|a| ProjectVisibility::from_str(&a).ok())
+                .unwrap_or_default(),
         })
     }
 
@@ -211,6 +215,10 @@ impl ProjectCrudOperations for SDKEngine {
             status: project_info
                 .status
                 .and_then(|a| ProjectStatus::from_str(&a).ok())
+                .unwrap_or_default(),
+            visibility: project_info
+                .visibility
+                .and_then(|a| ProjectVisibility::from_str(&a).ok())
                 .unwrap_or_default(),
         })
     }
@@ -251,6 +259,10 @@ impl ProjectCrudOperations for SDKEngine {
                 .status
                 .and_then(|a| ProjectStatus::from_str(&a).ok())
                 .unwrap_or_default(),
+            visibility: project_final_info
+                .visibility
+                .and_then(|a| ProjectVisibility::from_str(&a).ok())
+                .unwrap_or_default(),
         })
     }
 
@@ -279,6 +291,10 @@ impl ProjectCrudOperations for SDKEngine {
             status: project_info
                 .status
                 .and_then(|a| ProjectStatus::from_str(&a).ok())
+                .unwrap_or_default(),
+            visibility: project_info
+                .visibility
+                .and_then(|a| ProjectVisibility::from_str(&a).ok())
                 .unwrap_or_default(),
         })
     }
@@ -326,6 +342,10 @@ impl ProjectCrudOperations for SDKEngine {
                 status: x
                     .get::<'_, Option<String>, _>("status")
                     .and_then(|a| ProjectStatus::from_str(&a).ok())
+                    .unwrap_or_default(),
+                visibility: x
+                    .get::<'_, Option<String>, _>("visibility")
+                    .and_then(|a| ProjectVisibility::from_str(&a).ok())
                     .unwrap_or_default(),
             })
             .collect::<Vec<Project>>();

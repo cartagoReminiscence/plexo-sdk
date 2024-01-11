@@ -16,8 +16,10 @@ pub enum SDKError {
     // EmailAlreadyExists,
     // #[error("Poem error")]
     // PoemError(#[from] poem::error::NotFoundError),
-    #[error("SQLX error")]
+    #[error("SQLX Error")]
     SQLXError(#[from] sqlx::Error),
     // #[error("FromStr error")]
     // FromStrError(#[from] core::str::FromStr::Err),
+    #[error("Database Migration Error")]
+    MigrateError(#[from] sqlx::migrate::MigrateError),
 }

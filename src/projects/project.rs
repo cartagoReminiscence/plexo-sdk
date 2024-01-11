@@ -17,6 +17,7 @@ pub struct Project {
 
     pub name: String,
     pub status: ProjectStatus,
+    pub visibility: ProjectVisibility,
     pub owner_id: Uuid,
 
     pub prefix: Option<String>,
@@ -50,4 +51,27 @@ pub enum ProjectStatus {
     InProgress,
     Done,
     Canceled,
+}
+
+#[derive(
+    Debug,
+    Enum,
+    OpenApiEnum,
+    Copy,
+    Clone,
+    Default,
+    Display,
+    EnumString,
+    Deserialize,
+    Serialize,
+    Eq,
+    PartialEq,
+)]
+pub enum ProjectVisibility {
+    #[default]
+    None,
+    Private,
+    Internal,
+    Public,
+    // Shared,
 }

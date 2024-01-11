@@ -5,7 +5,6 @@ use plexo_sdk::{
     backend::engine::new_postgres_engine,
     tasks::{
         operations::{GetTasksInputBuilder, GetTasksWhereBuilder, TaskCrudOperations},
-        relations::TaskRelations,
         // relations::TaskRelations,
         task::TaskStatus,
     },
@@ -17,7 +16,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let database_url = var("DATABASE_URL").unwrap();
 
-    let engine = new_postgres_engine(database_url.as_str()).await.unwrap();
+    let engine = new_postgres_engine(database_url.as_str(), false)
+        .await
+        .unwrap();
 
     let tasks_filter = GetTasksInputBuilder::default()
         .filter(
@@ -39,9 +40,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("total tasks: {}", tasks.len());
 
-    let project = tasks.first().unwrap().project().await?;
+    // let project = tasks.first().unwrap().project().await?;
 
-    println!("project: {}", project.name);
+    // println!("project: {}", project.name);
 
     Ok(())
 }
