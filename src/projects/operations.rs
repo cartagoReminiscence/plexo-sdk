@@ -17,11 +17,7 @@ pub trait ProjectCrudOperations {
     async fn create_project(&self, input: CreateProjectInput) -> Result<Project, SDKError>;
     async fn get_project(&self, id: Uuid) -> Result<Project, SDKError>;
     async fn get_projects(&self, input: GetProjectsInput) -> Result<Vec<Project>, SDKError>;
-    async fn update_project(
-        &self,
-        id: Uuid,
-        input: UpdateProjectInput,
-    ) -> Result<Project, SDKError>;
+    async fn update_project(&self, id: Uuid, input: UpdateProjectInput) -> Result<Project, SDKError>;
     async fn delete_project(&self, id: Uuid) -> Result<Project, SDKError>;
 }
 
@@ -223,11 +219,7 @@ impl ProjectCrudOperations for SDKEngine {
         })
     }
 
-    async fn update_project(
-        &self,
-        id: Uuid,
-        input: UpdateProjectInput,
-    ) -> Result<Project, SDKError> {
+    async fn update_project(&self, id: Uuid, input: UpdateProjectInput) -> Result<Project, SDKError> {
         let project_final_info = sqlx::query!(
             r#"
             UPDATE projects
@@ -322,9 +314,7 @@ impl ProjectCrudOperations for SDKEngine {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
 
-        let projects_info = sqlx::query(query.as_str())
-            .fetch_all(self.pool.as_ref())
-            .await?;
+        let projects_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
 
         let projects = projects_info
             .iter()
