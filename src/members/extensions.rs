@@ -10,14 +10,8 @@ use super::member::{Member, MemberRole};
 
 #[async_trait]
 pub trait MembersExtensionOperations {
-    async fn create_member_from_github(
-        &self,
-        input: CreateMemberFromGithubInput,
-    ) -> Result<Member, SDKError>;
-    async fn create_member_from_email(
-        &self,
-        input: CreateMemberFromEmailInput,
-    ) -> Result<Member, SDKError>;
+    async fn create_member_from_github(&self, input: CreateMemberFromGithubInput) -> Result<Member, SDKError>;
+    async fn create_member_from_email(&self, input: CreateMemberFromEmailInput) -> Result<Member, SDKError>;
     async fn get_member_by_github_id(&self, github_id: String) -> Result<Member, SDKError>;
     async fn get_member_by_email(&self, email: String) -> Result<Member, SDKError>;
 }
@@ -42,10 +36,7 @@ pub struct CreateMemberFromEmailInput {
 
 #[async_trait]
 impl MembersExtensionOperations for SDKEngine {
-    async fn create_member_from_github(
-        &self,
-        input: CreateMemberFromGithubInput,
-    ) -> Result<Member, SDKError> {
+    async fn create_member_from_github(&self, input: CreateMemberFromGithubInput) -> Result<Member, SDKError> {
         let member_info = sqlx::query!(
             "
             INSERT INTO members (email, name, github_id, photo_url)
@@ -73,14 +64,11 @@ impl MembersExtensionOperations for SDKEngine {
                 .role
                 .and_then(|a| MemberRole::from_str(&a).ok())
                 .unwrap_or_default(),
-            password_hash: None,
+            password_hash: member_info.password_hash,
         })
     }
 
-    async fn create_member_from_email(
-        &self,
-        input: CreateMemberFromEmailInput,
-    ) -> Result<Member, SDKError> {
+    async fn create_member_from_email(&self, input: CreateMemberFromEmailInput) -> Result<Member, SDKError> {
         let member_info = sqlx::query!(
             "
             INSERT INTO members (email, name, password_hash, photo_url)
@@ -108,7 +96,7 @@ impl MembersExtensionOperations for SDKEngine {
                 .role
                 .and_then(|a| MemberRole::from_str(&a).ok())
                 .unwrap_or_default(),
-            password_hash: None,
+            password_hash: member_info.password_hash,
         })
     }
 
@@ -136,7 +124,7 @@ impl MembersExtensionOperations for SDKEngine {
                 .role
                 .and_then(|a| MemberRole::from_str(&a).ok())
                 .unwrap_or_default(),
-            password_hash: None,
+            password_hash: member_info.password_hash,
         })
     }
 
@@ -164,7 +152,7 @@ impl MembersExtensionOperations for SDKEngine {
                 .role
                 .and_then(|a| MemberRole::from_str(&a).ok())
                 .unwrap_or_default(),
-            password_hash: None,
+            password_hash: member_info.password_hash,
         })
     }
 }

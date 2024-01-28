@@ -24,7 +24,6 @@ pub struct Asset {
 #[derive(
     Debug, Enum, OpenApiEnum, Copy, Clone, Default, Display, EnumString, Deserialize, Serialize, Eq, PartialEq,
 )]
-
 pub enum AssetKind {
     #[default]
     Unknown,
