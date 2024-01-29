@@ -1,8 +1,6 @@
 use async_trait::async_trait;
 
-use crate::{
-    assets::asset::Asset, errors::sdk::SDKError, members::member::Member, projects::project::Project, tasks::task::Task,
-};
+use crate::{assets::asset::Asset, errors::sdk::SDKError, members::member::Member, projects::project::Project};
 
 #[async_trait]
 pub trait AssetRelations {
