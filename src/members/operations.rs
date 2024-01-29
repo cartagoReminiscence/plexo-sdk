@@ -239,9 +239,7 @@ impl MemberCrudOperations for SDKEngine {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
 
-        let members_info = sqlx::query(query.as_str())
-            .fetch_all(self.pool.as_ref())
-            .await?;
+        let members_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
 
         let members = members_info
             .iter()
@@ -252,7 +250,7 @@ impl MemberCrudOperations for SDKEngine {
                 name: x.get("name"),
                 email: x.get("email"),
                 role: x
-                    .get::<'_, Option<String>, _>("status")
+                    .get::<'_, Option<String>, _>("role")
                     .and_then(|a| MemberRole::from_str(&a).ok())
                     .unwrap_or_default(),
                 github_id: x.get("github_id"),
