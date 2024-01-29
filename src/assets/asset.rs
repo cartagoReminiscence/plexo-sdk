@@ -15,8 +15,8 @@ pub struct Asset {
     pub updated_at: DateTime<Utc>,
 
     pub name: String,
-    pub owner_id: Uuid,
     pub kind: AssetKind,
+    pub owner_id: Uuid,
 
     pub project_id: Option<Uuid>,
 }
