@@ -76,8 +76,10 @@ pub struct GetTeamsWhere {
     #[builder(setter(strip_option), default)]
     pub prefix: Option<String>,
 
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _and: Option<Vec<GetTeamsWhere>>,
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _or: Option<Vec<GetTeamsWhere>>,
 }
@@ -218,9 +220,7 @@ impl TeamCrudOperations for SDKEngine {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
 
-        let teams_info = sqlx::query(query.as_str())
-            .fetch_all(self.pool.as_ref())
-            .await?;
+        let teams_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
 
         let teams = teams_info
             .iter()
