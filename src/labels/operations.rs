@@ -67,8 +67,10 @@ pub struct GetLabelsWhere {
     #[builder(setter(strip_option), default)]
     pub color: Option<String>,
 
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _and: Option<Vec<GetLabelsWhere>>,
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _or: Option<Vec<GetLabelsWhere>>,
 }
@@ -184,9 +186,7 @@ impl LabelCrudOperations for SDKEngine {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
 
-        let labels_info = sqlx::query(query.as_str())
-            .fetch_all(self.pool.as_ref())
-            .await?;
+        let labels_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
 
         let labels = labels_info
             .into_iter()

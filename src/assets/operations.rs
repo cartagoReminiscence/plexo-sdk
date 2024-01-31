@@ -75,8 +75,10 @@ pub struct GetAssetsWhere {
     #[builder(setter(strip_option), default)]
     pub project_id: Option<Uuid>,
 
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _and: Option<Vec<GetAssetsWhere>>,
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _or: Option<Vec<GetAssetsWhere>>,
 }

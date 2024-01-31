@@ -108,8 +108,11 @@ pub struct GetTasksWhere {
     #[builder(setter(strip_option), default)]
     pub parent_id: Option<Uuid>,
 
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _and: Option<Vec<GetTasksWhere>>,
+
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _or: Option<Vec<GetTasksWhere>>,
 }
@@ -171,7 +174,8 @@ impl GetTasksWhere {
 #[async_trait]
 impl TaskCrudOperations for SDKEngine {
     async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError> {
-        let task_final_info = sqlx::query!(r#"
+        let task_final_info = sqlx::query!(
+            r#"
             INSERT INTO tasks (title, description, owner_id, status, priority, due_date, project_id, lead_id, parent_id)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
@@ -185,7 +189,9 @@ impl TaskCrudOperations for SDKEngine {
             input.project_id,
             input.lead_id,
             input.parent_id,
-        ).fetch_one(self.pool.as_ref()).await?;
+        )
+        .fetch_one(self.pool.as_ref())
+        .await?;
 
         let task = Task {
             id: task_final_info.id,
@@ -367,9 +373,7 @@ impl TaskCrudOperations for SDKEngine {
             None => query,
         };
 
-        let tasks_info = sqlx::query(query.as_str())
-            .fetch_all(self.pool.as_ref())
-            .await?;
+        let tasks_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
 
         Ok(tasks_info
             .iter()

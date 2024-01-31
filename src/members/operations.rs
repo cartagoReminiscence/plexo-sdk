@@ -90,8 +90,10 @@ pub struct GetMembersWhere {
     #[builder(setter(strip_option), default)]
     photo_url: Option<String>,
 
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     _and: Option<Vec<GetMembersWhere>>,
+    #[oai(skip)]
     #[builder(setter(strip_option), default)]
     _or: Option<Vec<GetMembersWhere>>,
 }
