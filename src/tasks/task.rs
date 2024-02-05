@@ -29,23 +29,13 @@ pub struct Task {
 }
 
 #[derive(
-    Debug,
-    Enum,
-    OpenApiEnum,
-    Copy,
-    Clone,
-    Default,
-    Display,
-    EnumString,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
+    Debug, Enum, OpenApiEnum, Copy, Clone, Default, Display, EnumString, Deserialize, Serialize, Eq, PartialEq,
 )]
 
 pub enum TaskStatus {
     #[default]
     None,
+    Draft,
     Backlog,
     ToDo,
     InProgress,
@@ -54,18 +44,7 @@ pub enum TaskStatus {
 }
 
 #[derive(
-    Debug,
-    Enum,
-    OpenApiEnum,
-    Copy,
-    Clone,
-    Default,
-    Display,
-    EnumString,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
+    Debug, Enum, OpenApiEnum, Copy, Clone, Default, Display, EnumString, Deserialize, Serialize, Eq, PartialEq,
 )]
 
 pub enum TaskPriority {
