@@ -8,7 +8,7 @@ use uuid::Uuid;
 use poem_openapi::Enum as OpenApiEnum;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, SimpleObject, Object, Clone)]
+#[derive(Debug, SimpleObject, Object, Clone, Serialize)]
 pub struct Task {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,

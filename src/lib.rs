@@ -1,5 +1,6 @@
 pub mod assets;
 pub mod backend;
+pub mod cognition;
 pub mod common;
 pub mod errors;
 pub mod labels;

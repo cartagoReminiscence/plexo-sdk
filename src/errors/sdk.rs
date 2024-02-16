@@ -22,4 +22,7 @@ pub enum SDKError {
     // FromStrError(#[from] core::str::FromStr::Err),
     #[error("Database Migration Error")]
     MigrateError(#[from] sqlx::migrate::MigrateError),
+
+    #[error("Serde JSON Error")]
+    SerdeJSONError(#[from] serde_json::Error),
 }
