@@ -3,33 +3,31 @@ use std::str::FromStr;
 use async_openai::types::{
     ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs,
 };
+use async_trait::async_trait;
 use sqlx::query;
 use uuid::Uuid;
 
-use super::{operations::TaskSuggestionInput, processor::Cognition};
-use crate::tasks::task::{Task, TaskPriority, TaskStatus};
+use super::operations::TaskSuggestionInput;
+use crate::{
+    backend::engine::SDKEngine,
+    tasks::task::{Task, TaskPriority, TaskStatus},
+};
 
+#[async_trait]
 pub trait CognitionCapabilities {
-    fn chat_completion(
-        &self,
-        system_message: String,
-        user_message: String,
-    ) -> impl std::future::Future<Output = String> + Send;
-    fn acquire_tasks_fingerprints(
-        &self,
-        number_of_tasks: u32,
-        project_id: Option<Uuid>,
-    ) -> impl std::future::Future<Output = Vec<String>> + Send;
+    async fn chat_completion(&self, system_message: String, user_message: String) -> String;
+    async fn acquire_tasks_fingerprints(&self, number_of_tasks: u32, project_id: Option<Uuid>) -> Vec<String>;
 
     fn calculate_task_fingerprint(task: Task) -> String;
     fn calculate_task_suggestion_fingerprint(task_suggestion: TaskSuggestionInput) -> String;
 }
 
-impl CognitionCapabilities for Cognition {
+#[async_trait]
+impl CognitionCapabilities for SDKEngine {
     async fn chat_completion(&self, system_message: String, user_message: String) -> String {
         let request = CreateChatCompletionRequestArgs::default()
-            .max_tokens(512u16)
-            .model(self.model_name().to_string())
+            .max_tokens(1024u16)
+            .model(self.llm_model_name.clone())
             .messages([
                 ChatCompletionRequestSystemMessageArgs::default()
                     .content(system_message)
@@ -45,7 +43,7 @@ impl CognitionCapabilities for Cognition {
             .build()
             .unwrap();
 
-        let response = self.client().chat().create(request).await.unwrap();
+        let response = self.llm_client.chat().create(request).await.unwrap();
 
         response.choices.first().unwrap().message.content.clone().unwrap()
     }
@@ -86,7 +84,7 @@ impl CognitionCapabilities for Cognition {
         LIMIT 10
         "#,
         )
-        .fetch_all(&*self.pool)
+        .fetch_all(&*self.db_pool)
         .await
         .unwrap();
 

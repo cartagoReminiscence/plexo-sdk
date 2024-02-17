@@ -190,7 +190,7 @@ impl TaskCrudOperations for SDKEngine {
             input.lead_id,
             input.parent_id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let task = Task {
@@ -225,7 +225,7 @@ impl TaskCrudOperations for SDKEngine {
             "#,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let task = Task {
@@ -279,7 +279,7 @@ impl TaskCrudOperations for SDKEngine {
             input.parent_id,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let task = Task {
@@ -315,7 +315,7 @@ impl TaskCrudOperations for SDKEngine {
             "#,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let task = Task {
@@ -373,7 +373,7 @@ impl TaskCrudOperations for SDKEngine {
             None => query,
         };
 
-        let tasks_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
+        let tasks_info = sqlx::query(query.as_str()).fetch_all(self.db_pool.as_ref()).await?;
 
         Ok(tasks_info
             .iter()

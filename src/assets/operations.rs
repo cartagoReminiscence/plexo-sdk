@@ -140,7 +140,7 @@ impl AssetCrudOperations for SDKEngine {
             input.kind.map(|k| k.to_string()),
             input.project_id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Asset {
@@ -161,7 +161,7 @@ impl AssetCrudOperations for SDKEngine {
             "#,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Asset {
@@ -198,7 +198,7 @@ impl AssetCrudOperations for SDKEngine {
             query.push_str(&format!("OFFSET {} ", offset));
         }
 
-        let assets_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
+        let assets_info = sqlx::query(query.as_str()).fetch_all(self.db_pool.as_ref()).await?;
 
         let assets = assets_info
             .into_iter()
@@ -235,7 +235,7 @@ impl AssetCrudOperations for SDKEngine {
             input.project_id,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Asset {
@@ -257,7 +257,7 @@ impl AssetCrudOperations for SDKEngine {
             "#,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Asset {

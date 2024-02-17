@@ -164,7 +164,7 @@ impl ProjectCrudOperations for SDKEngine {
             input.owner_id,
             input.status.unwrap_or_default().to_string(),
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Project {
@@ -196,7 +196,7 @@ impl ProjectCrudOperations for SDKEngine {
             "#,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Project {
@@ -235,7 +235,7 @@ impl ProjectCrudOperations for SDKEngine {
             input.description,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Project {
@@ -268,7 +268,7 @@ impl ProjectCrudOperations for SDKEngine {
             "#,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Project {
@@ -316,7 +316,7 @@ impl ProjectCrudOperations for SDKEngine {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
 
-        let projects_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
+        let projects_info = sqlx::query(query.as_str()).fetch_all(self.db_pool.as_ref()).await?;
 
         let projects = projects_info
             .iter()

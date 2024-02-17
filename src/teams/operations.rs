@@ -150,7 +150,7 @@ impl TeamCrudOperations for SDKEngine {
             input.visibility.to_string(),
             input.prefix
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let team = Team {
@@ -178,7 +178,7 @@ impl TeamCrudOperations for SDKEngine {
             "#,
             id
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let team = Team {
@@ -220,7 +220,7 @@ impl TeamCrudOperations for SDKEngine {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
 
-        let teams_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
+        let teams_info = sqlx::query(query.as_str()).fetch_all(self.db_pool.as_ref()).await?;
 
         let teams = teams_info
             .iter()
@@ -260,7 +260,7 @@ impl TeamCrudOperations for SDKEngine {
             input.prefix,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let team = Team {
@@ -288,7 +288,7 @@ impl TeamCrudOperations for SDKEngine {
             "#,
             id
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let team = Team {

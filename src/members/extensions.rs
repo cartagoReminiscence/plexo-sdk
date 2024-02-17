@@ -48,7 +48,7 @@ impl MembersExtensionOperations for SDKEngine {
             input.github_id,
             input.photo_url,
         )
-        .fetch_one(&*self.pool)
+        .fetch_one(&*self.db_pool)
         .await?;
 
         Ok(Member {
@@ -80,7 +80,7 @@ impl MembersExtensionOperations for SDKEngine {
             input.password_hash,
             input.photo_url,
         )
-        .fetch_one(&*self.pool)
+        .fetch_one(&*self.db_pool)
         .await?;
 
         Ok(Member {
@@ -108,7 +108,7 @@ impl MembersExtensionOperations for SDKEngine {
             ",
             github_id,
         )
-        .fetch_one(&*self.pool)
+        .fetch_one(&*self.db_pool)
         .await?;
 
         Ok(Member {
@@ -136,7 +136,7 @@ impl MembersExtensionOperations for SDKEngine {
             ",
             email,
         )
-        .fetch_one(&*self.pool)
+        .fetch_one(&*self.db_pool)
         .await?;
 
         Ok(Member {

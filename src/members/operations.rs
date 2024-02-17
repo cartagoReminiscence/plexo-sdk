@@ -165,7 +165,7 @@ impl MemberCrudOperations for SDKEngine {
             input.photo_url,
             input.password_hash
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let member = Member {
@@ -196,7 +196,7 @@ impl MemberCrudOperations for SDKEngine {
             "#,
             id
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let member = Member {
@@ -241,7 +241,7 @@ impl MemberCrudOperations for SDKEngine {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
 
-        let members_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
+        let members_info = sqlx::query(query.as_str()).fetch_all(self.db_pool.as_ref()).await?;
 
         let members = members_info
             .iter()
@@ -289,7 +289,7 @@ impl MemberCrudOperations for SDKEngine {
             input.password_hash,
             id
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let member = Member {
@@ -319,7 +319,7 @@ impl MemberCrudOperations for SDKEngine {
             "#,
             id
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         let member = Member {

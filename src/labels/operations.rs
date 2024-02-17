@@ -129,7 +129,7 @@ impl LabelCrudOperations for SDKEngine {
             input.description,
             input.color,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Label {
@@ -150,7 +150,7 @@ impl LabelCrudOperations for SDKEngine {
             "#,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Label {
@@ -186,7 +186,7 @@ impl LabelCrudOperations for SDKEngine {
             query.push_str(format!("OFFSET {} ", offset).as_str());
         }
 
-        let labels_info = sqlx::query(query.as_str()).fetch_all(self.pool.as_ref()).await?;
+        let labels_info = sqlx::query(query.as_str()).fetch_all(self.db_pool.as_ref()).await?;
 
         let labels = labels_info
             .into_iter()
@@ -219,7 +219,7 @@ impl LabelCrudOperations for SDKEngine {
             input.color,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Label {
@@ -240,7 +240,7 @@ impl LabelCrudOperations for SDKEngine {
             "#,
             id,
         )
-        .fetch_one(self.pool.as_ref())
+        .fetch_one(self.db_pool.as_ref())
         .await?;
 
         Ok(Label {
