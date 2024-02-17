@@ -49,7 +49,6 @@ pub struct TaskSuggestionResult {
 #[builder(pattern = "owned")]
 pub struct SubdivideTaskInput {
     pub task_id: Uuid,
-
     pub subtasks: u8, // TODO: validate it or die
 }
 

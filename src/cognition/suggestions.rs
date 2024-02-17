@@ -1,16 +1,17 @@
-use std::str::FromStr;
-
 use async_openai::types::{
     ChatCompletionRequestSystemMessageArgs, ChatCompletionRequestUserMessageArgs, CreateChatCompletionRequestArgs,
 };
 use async_trait::async_trait;
-use sqlx::query;
+
 use uuid::Uuid;
 
 use super::operations::TaskSuggestionInput;
 use crate::{
     backend::engine::SDKEngine,
-    tasks::task::{Task, TaskPriority, TaskStatus},
+    tasks::{
+        operations::{GetTasksInputBuilder, TaskCrudOperations},
+        task::Task,
+    },
 };
 
 #[async_trait]
@@ -76,17 +77,13 @@ impl CognitionCapabilities for SDKEngine {
         )
     }
 
-    async fn acquire_tasks_fingerprints(&self, _number_of_tasks: u32, _project_id: Option<Uuid>) -> Vec<String> {
-        let tasks = query!(
-            r#"
-        SELECT *
-        FROM tasks
-        LIMIT 10
-        "#,
-        )
-        .fetch_all(&*self.db_pool)
-        .await
-        .unwrap();
+    async fn acquire_tasks_fingerprints(&self, number_of_tasks: u32, _project_id: Option<Uuid>) -> Vec<String> {
+        let filter = GetTasksInputBuilder::default()
+            .limit(number_of_tasks as i32)
+            .build()
+            .ok();
+
+        let tasks = self.get_tasks(filter).await.unwrap();
 
         tasks
             .iter()
@@ -96,16 +93,8 @@ impl CognitionCapabilities for SDKEngine {
                 updated_at: r.updated_at,
                 title: r.title.clone(),
                 description: r.description.clone(),
-                status: r
-                    .status
-                    .clone()
-                    .and_then(|a| TaskStatus::from_str(&a).ok())
-                    .unwrap_or_default(),
-                priority: r
-                    .priority
-                    .clone()
-                    .and_then(|a| TaskPriority::from_str(&a).ok())
-                    .unwrap_or_default(),
+                status: r.status,
+                priority: r.priority,
                 due_date: r.due_date,
                 project_id: r.project_id,
                 lead_id: r.lead_id,
