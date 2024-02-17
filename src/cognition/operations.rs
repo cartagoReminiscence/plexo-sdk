@@ -9,7 +9,10 @@ use uuid::Uuid;
 use crate::{
     backend::engine::SDKEngine,
     errors::sdk::SDKError,
-    tasks::task::{TaskPriority, TaskStatus},
+    tasks::{
+        operations::TaskCrudOperations,
+        task::{TaskPriority, TaskStatus},
+    },
 };
 
 use super::suggestions::CognitionCapabilities;
@@ -46,6 +49,7 @@ pub struct TaskSuggestionResult {
 #[builder(pattern = "owned")]
 pub struct SubdivideTaskInput {
     pub task_id: Uuid,
+
     pub subtasks: u8, // TODO: validate it or die
 }
 
@@ -87,7 +91,6 @@ impl CognitionOperations for SDKEngine {
         );
 
         let result = self.chat_completion(system_message, user_message).await;
-
         let result = result.trim().trim_matches('`');
 
         let suggestion_result: TaskSuggestionResult = serde_json::from_str(result)?;
@@ -95,7 +98,42 @@ impl CognitionOperations for SDKEngine {
         Ok(suggestion_result)
     }
 
-    async fn subdivide_task(&self, _input: SubdivideTaskInput) -> Result<Vec<TaskSuggestionResult>, SDKError> {
-        todo!()
+    async fn subdivide_task(&self, input: SubdivideTaskInput) -> Result<Vec<TaskSuggestionResult>, SDKError> {
+        let task = self.get_task(input.task_id).await?;
+
+        let system_message = "The user pass to you one task and you should predict a list of subtasks.
+        Please return only a valid json with the following struct [{
+                title: String,
+                description: String,
+                status: TaskStatus,
+                priority: TaskPriority,
+                due_date: DateTime<Utc>
+        }]
+        For TaskStatus and TaskPriority, please use the following values:
+        TaskStatus: None, Backlog, ToDo, InProgress, Done, Canceled
+        TaskPriority: None, Low, Medium, High, Urgent
+        "
+        .to_string();
+
+        let user_message = format!(
+            "
+            Current Time:
+            {}
+
+            Parent Task: 
+            {}
+            
+            With the above context, generate {} subtasks.",
+            Local::now(),
+            Self::calculate_task_fingerprint(task),
+            input.subtasks,
+        );
+
+        let result = self.chat_completion(system_message, user_message).await;
+        let result = result.trim().trim_matches('`');
+
+        let subtasks: Vec<TaskSuggestionResult> = serde_json::from_str(result)?;
+
+        Ok(subtasks)
     }
 }

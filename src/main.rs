@@ -3,7 +3,7 @@ use std::{env::var, error::Error};
 use dotenv::dotenv;
 use plexo_sdk::{
     backend::engine::new_postgres_engine,
-    cognition::operations::{CognitionOperations, TaskSuggestionInputBuilder},
+    cognition::operations::{CognitionOperations, SubdivideTaskInputBuilder, TaskSuggestionInputBuilder},
     tasks::{
         operations::{GetTasksInputBuilder, GetTasksWhereBuilder, TaskCrudOperations},
         // relations::TaskRelations,
@@ -46,6 +46,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await?;
 
     println!("suggestion: {:?}", suggestion);
+
+    let task_id = tasks.first().unwrap().id;
+
+    let subtasks = engine
+        .subdivide_task(
+            SubdivideTaskInputBuilder::default()
+                .subtasks(3)
+                .task_id(task_id)
+                .build()?,
+        )
+        .await?;
+
+    println!("subtasks: {:?}", subtasks);
 
     Ok(())
 }
