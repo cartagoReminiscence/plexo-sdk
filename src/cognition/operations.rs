@@ -1,4 +1,4 @@
-use async_graphql::InputObject;
+use async_graphql::{InputObject, SimpleObject};
 use async_trait::async_trait;
 use chrono::{DateTime, Local, Utc};
 use derive_builder::Builder;
@@ -35,9 +35,9 @@ pub struct TaskSuggestionInput {
     pub due_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Default, Builder, Object, InputObject, Deserialize)]
+#[derive(Debug, Default, Builder, Object, SimpleObject, Deserialize)]
 #[builder(pattern = "owned")]
-pub struct TaskSuggestionResult {
+pub struct TaskSuggestion {
     pub title: String,
     pub description: String,
     pub status: TaskStatus,
@@ -54,13 +54,13 @@ pub struct SubdivideTaskInput {
 
 #[async_trait]
 pub trait CognitionOperations {
-    async fn get_suggestions(&self, input: TaskSuggestionInput) -> Result<TaskSuggestionResult, SDKError>;
-    async fn subdivide_task(&self, input: SubdivideTaskInput) -> Result<Vec<TaskSuggestionResult>, SDKError>;
+    async fn get_suggestions(&self, input: TaskSuggestionInput) -> Result<TaskSuggestion, SDKError>;
+    async fn subdivide_task(&self, input: SubdivideTaskInput) -> Result<Vec<TaskSuggestion>, SDKError>;
 }
 
 #[async_trait]
 impl CognitionOperations for SDKEngine {
-    async fn get_suggestions(&self, input: TaskSuggestionInput) -> Result<TaskSuggestionResult, SDKError> {
+    async fn get_suggestions(&self, input: TaskSuggestionInput) -> Result<TaskSuggestion, SDKError> {
         let tasks_fingerprints = self.acquire_tasks_fingerprints(10, input.project_id).await;
 
         let system_message =
@@ -92,12 +92,12 @@ impl CognitionOperations for SDKEngine {
         let result = self.chat_completion(system_message, user_message).await;
         let result = result.trim().trim_matches('`');
 
-        let suggestion_result: TaskSuggestionResult = serde_json::from_str(result)?;
+        let suggestion_result: TaskSuggestion = serde_json::from_str(result)?;
 
         Ok(suggestion_result)
     }
 
-    async fn subdivide_task(&self, input: SubdivideTaskInput) -> Result<Vec<TaskSuggestionResult>, SDKError> {
+    async fn subdivide_task(&self, input: SubdivideTaskInput) -> Result<Vec<TaskSuggestion>, SDKError> {
         let task = self.get_task(input.task_id).await?;
 
         let system_message = "The user pass to you one task and you should predict a list of subtasks.
@@ -131,7 +131,7 @@ impl CognitionOperations for SDKEngine {
         let result = self.chat_completion(system_message, user_message).await;
         let result = result.trim().trim_matches('`');
 
-        let subtasks: Vec<TaskSuggestionResult> = serde_json::from_str(result)?;
+        let subtasks: Vec<TaskSuggestion> = serde_json::from_str(result)?;
 
         Ok(subtasks)
     }
