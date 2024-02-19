@@ -8,7 +8,7 @@ use uuid::Uuid;
 use super::operations::TaskSuggestionInput;
 use crate::{
     backend::engine::SDKEngine,
-    tasks::{
+    resources::tasks::{
         operations::{GetTasksInputBuilder, TaskCrudOperations},
         task::Task,
     },

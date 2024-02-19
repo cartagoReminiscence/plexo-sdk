@@ -12,7 +12,7 @@ use uuid::Uuid;
 use crate::backend::engine::SDKEngine;
 use crate::common::commons::SortOrder;
 use crate::errors::sdk::SDKError;
-use crate::tasks::task::{Task, TaskPriority, TaskStatus};
+use crate::resources::tasks::task::{Task, TaskPriority, TaskStatus};
 
 #[async_trait]
 pub trait TaskCrudOperations {

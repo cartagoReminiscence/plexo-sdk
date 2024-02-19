@@ -4,7 +4,7 @@ use dotenv::dotenv;
 use plexo_sdk::{
     backend::engine::new_postgres_engine,
     cognition::operations::{CognitionOperations, SubdivideTaskInputBuilder, TaskSuggestionInputBuilder},
-    tasks::{
+    resources::tasks::{
         operations::{GetTasksInputBuilder, GetTasksWhereBuilder, TaskCrudOperations},
         // relations::TaskRelations,
         task::TaskStatus,

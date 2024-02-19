@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
@@ -5,12 +7,10 @@ use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
-use crate::assets::asset::{Asset, AssetKind};
 use crate::backend::engine::SDKEngine;
 use crate::common::commons::SortOrder;
 use crate::errors::sdk::SDKError;
-
-use std::str::FromStr;
+use crate::resources::assets::asset::{Asset, AssetKind};
 
 #[async_trait]
 pub trait AssetCrudOperations {

@@ -1,6 +1,9 @@
 use async_trait::async_trait;
 
-use crate::{assets::asset::Asset, errors::sdk::SDKError, members::member::Member, tasks::task::Task};
+use crate::{
+    errors::sdk::SDKError, resources::assets::asset::Asset, resources::members::member::Member,
+    resources::tasks::task::Task,
+};
 
 use super::project::Project;
 

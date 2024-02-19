@@ -9,7 +9,7 @@ use uuid::Uuid;
 use crate::{
     backend::engine::SDKEngine,
     errors::sdk::SDKError,
-    tasks::{
+    resources::tasks::{
         operations::TaskCrudOperations,
         task::{TaskPriority, TaskStatus},
     },

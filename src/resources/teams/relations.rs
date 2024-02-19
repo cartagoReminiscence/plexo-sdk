@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::{errors::sdk::SDKError, members::member::Member, projects::project::Project};
+use crate::{errors::sdk::SDKError, resources::members::member::Member, resources::projects::project::Project};
 
 use super::team::Team;
 
