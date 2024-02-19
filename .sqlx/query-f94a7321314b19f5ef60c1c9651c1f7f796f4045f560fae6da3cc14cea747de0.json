@@ -32,6 +32,11 @@
         "ordinal": 5,
         "name": "color",
         "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "owner_id",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -45,7 +50,8 @@
       false,
       false,
       true,
-      true
+      true,
+      false
     ]
   },
   "hash": "f94a7321314b19f5ef60c1c9651c1f7f796f4045f560fae6da3cc14cea747de0"

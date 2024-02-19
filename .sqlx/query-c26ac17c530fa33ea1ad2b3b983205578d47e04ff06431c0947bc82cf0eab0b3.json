@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            UPDATE labels\n            SET\n                name = COALESCE($1, name),\n                description = COALESCE($2, description),\n                color = COALESCE($3, color)\n            WHERE id = $4\n            RETURNING *\n            ",
+  "query": "\n            INSERT INTO changes (owner_id, resource_id, operation, resource_type, diff_json)\n            VALUES ($1, $2, $3, $4, $5)\n            RETURNING *\n            ",
   "describe": {
     "columns": [
       {
@@ -20,31 +20,37 @@
       },
       {
         "ordinal": 3,
-        "name": "name",
-        "type_info": "Text"
+        "name": "owner_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 4,
-        "name": "description",
-        "type_info": "Text"
+        "name": "resource_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 5,
-        "name": "color",
-        "type_info": "Varchar"
+        "name": "operation",
+        "type_info": "Text"
       },
       {
         "ordinal": 6,
-        "name": "owner_id",
-        "type_info": "Uuid"
+        "name": "resource_type",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "diff_json",
+        "type_info": "Text"
       }
     ],
     "parameters": {
       "Left": [
+        "Uuid",
+        "Uuid",
         "Text",
         "Text",
-        "Varchar",
-        "Uuid"
+        "Text"
       ]
     },
     "nullable": [
@@ -52,10 +58,11 @@
       false,
       false,
       false,
-      true,
-      true,
+      false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "6538f213db7b7e6b8fa5e7fcfba6e65372950dc2719ff42d0c7915e377f1010d"
+  "hash": "c26ac17c530fa33ea1ad2b3b983205578d47e04ff06431c0947bc82cf0eab0b3"
 }

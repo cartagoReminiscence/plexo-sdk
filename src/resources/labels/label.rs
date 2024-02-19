@@ -12,6 +12,8 @@ pub struct Label {
     pub updated_at: DateTime<Utc>,
 
     pub name: String,
+    pub owner_id: Uuid,
+
     pub description: Option<String>,
     pub color: Option<String>,
 }

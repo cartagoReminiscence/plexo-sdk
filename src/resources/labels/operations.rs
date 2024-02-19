@@ -23,6 +23,9 @@ pub trait LabelCrudOperations {
 pub struct CreateLabelInput {
     pub name: String,
 
+    #[graphql(skip)]
+    pub owner_id: Uuid,
+
     #[builder(setter(strip_option), default)]
     pub description: Option<String>,
     #[builder(setter(strip_option), default)]
@@ -121,13 +124,14 @@ impl LabelCrudOperations for SDKEngine {
     async fn create_label(&self, input: CreateLabelInput) -> Result<Label, SDKError> {
         let label_info = sqlx::query!(
             r#"
-            INSERT INTO labels (name, description, color)
-            VALUES ($1, $2, $3)
+            INSERT INTO labels (name, description, color, owner_id)
+            VALUES ($1, $2, $3, $4)
             RETURNING *
             "#,
             input.name,
             input.description,
             input.color,
+            input.owner_id,
         )
         .fetch_one(self.db_pool.as_ref())
         .await?;
@@ -137,6 +141,7 @@ impl LabelCrudOperations for SDKEngine {
             created_at: label_info.created_at,
             updated_at: label_info.updated_at,
             name: label_info.name,
+            owner_id: label_info.owner_id,
             description: label_info.description,
             color: label_info.color,
         })
@@ -158,6 +163,7 @@ impl LabelCrudOperations for SDKEngine {
             created_at: label_info.created_at,
             updated_at: label_info.updated_at,
             name: label_info.name,
+            owner_id: label_info.owner_id,
             description: label_info.description,
             color: label_info.color,
         })
@@ -195,6 +201,7 @@ impl LabelCrudOperations for SDKEngine {
                 created_at: label_info.get("created_at"),
                 updated_at: label_info.get("updated_at"),
                 name: label_info.get("name"),
+                owner_id: label_info.get("owner_id"),
                 description: label_info.get("description"),
                 color: label_info.get("color"),
             })
@@ -227,6 +234,7 @@ impl LabelCrudOperations for SDKEngine {
             created_at: label_info.created_at,
             updated_at: label_info.updated_at,
             name: label_info.name,
+            owner_id: label_info.owner_id,
             description: label_info.description,
             color: label_info.color,
         })
@@ -248,6 +256,7 @@ impl LabelCrudOperations for SDKEngine {
             created_at: label_info.created_at,
             updated_at: label_info.updated_at,
             name: label_info.name,
+            owner_id: label_info.owner_id,
             description: label_info.description,
             color: label_info.color,
         })
