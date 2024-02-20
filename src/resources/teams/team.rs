@@ -9,6 +9,7 @@ use poem_openapi::Enum as OpenApiEnum;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, SimpleObject, Object, Clone)]
+#[graphql(name = "SDKTeam")]
 pub struct Team {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
@@ -24,18 +25,7 @@ pub struct Team {
 }
 
 #[derive(
-    Debug,
-    Enum,
-    OpenApiEnum,
-    Copy,
-    Clone,
-    Default,
-    Display,
-    EnumString,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
+    Debug, Enum, OpenApiEnum, Copy, Clone, Default, Display, EnumString, Deserialize, Serialize, Eq, PartialEq,
 )]
 pub enum TeamVisibility {
     #[default]

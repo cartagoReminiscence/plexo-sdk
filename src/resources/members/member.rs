@@ -8,6 +8,7 @@ use strum_macros::EnumString;
 use uuid::Uuid;
 
 #[derive(Debug, SimpleObject, Object, Clone)]
+#[graphql(name = "SDKMember")]
 pub struct Member {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
@@ -29,18 +30,7 @@ pub struct Member {
 }
 
 #[derive(
-    Debug,
-    Enum,
-    OpenApiEnum,
-    Copy,
-    Clone,
-    Default,
-    Display,
-    EnumString,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
+    Debug, Enum, OpenApiEnum, Copy, Clone, Default, Display, EnumString, Deserialize, Serialize, Eq, PartialEq,
 )]
 pub enum MemberRole {
     Admin,

@@ -10,6 +10,7 @@ use strum_macros::{Display, EnumString};
 use poem_openapi::Enum as OpenApiEnum;
 use serde::{Deserialize, Serialize};
 #[derive(Debug, SimpleObject, Object, Clone)]
+#[graphql(name = "SDKProject")]
 pub struct Project {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
@@ -29,18 +30,7 @@ pub struct Project {
 }
 
 #[derive(
-    Debug,
-    Enum,
-    OpenApiEnum,
-    Copy,
-    Clone,
-    Default,
-    Display,
-    EnumString,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
+    Debug, Enum, OpenApiEnum, Copy, Clone, Default, Display, EnumString, Deserialize, Serialize, Eq, PartialEq,
 )]
 
 pub enum ProjectStatus {
@@ -54,18 +44,7 @@ pub enum ProjectStatus {
 }
 
 #[derive(
-    Debug,
-    Enum,
-    OpenApiEnum,
-    Copy,
-    Clone,
-    Default,
-    Display,
-    EnumString,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
+    Debug, Enum, OpenApiEnum, Copy, Clone, Default, Display, EnumString, Deserialize, Serialize, Eq, PartialEq,
 )]
 pub enum ProjectVisibility {
     #[default]

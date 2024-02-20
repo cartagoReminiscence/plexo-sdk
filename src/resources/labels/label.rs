@@ -6,6 +6,7 @@ use poem_openapi::Object;
 use uuid::Uuid;
 
 #[derive(Debug, SimpleObject, Object, Clone)]
+#[graphql(name = "SDKLabel")]
 pub struct Label {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,

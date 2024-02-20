@@ -9,6 +9,7 @@ use poem_openapi::Enum as OpenApiEnum;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, SimpleObject, Object, Clone)]
+#[graphql(name = "SDKChange")]
 pub struct Change {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
