@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, created_at, updated_at, name, email, role, github_id, google_id, photo_url, password_hash\n            FROM members\n            WHERE id = $1\n            ",
+  "query": "\n            SELECT * FROM projects WHERE id  = ANY($1)\n            ",
   "describe": {
     "columns": [
       {
@@ -25,38 +25,48 @@
       },
       {
         "ordinal": 4,
-        "name": "email",
+        "name": "prefix",
         "type_info": "Varchar"
       },
       {
         "ordinal": 5,
-        "name": "role",
-        "type_info": "Varchar"
+        "name": "owner_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 6,
-        "name": "github_id",
-        "type_info": "Varchar"
+        "name": "description",
+        "type_info": "Text"
       },
       {
         "ordinal": 7,
-        "name": "google_id",
-        "type_info": "Varchar"
+        "name": "lead_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 8,
-        "name": "photo_url",
-        "type_info": "Varchar"
+        "name": "start_date",
+        "type_info": "Timestamptz"
       },
       {
         "ordinal": 9,
-        "name": "password_hash",
+        "name": "due_date",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 10,
+        "name": "status",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 11,
+        "name": "visibility",
         "type_info": "Varchar"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid"
+        "UuidArray"
       ]
     },
     "nullable": [
@@ -64,7 +74,9 @@
       false,
       false,
       false,
+      true,
       false,
+      true,
       true,
       true,
       true,
@@ -72,5 +84,5 @@
       true
     ]
   },
-  "hash": "56418ea73c68a6dd3d78b67511dae51b93cb9fa5667c4bf53a509d92514d71c7"
+  "hash": "f50ffff57ae2278f7e10ae7dcd3ae87ceb67956492b5078857fb9d1fd2579dd3"
 }

@@ -203,7 +203,7 @@ impl MemberCrudOperations for SDKEngine {
     async fn get_member(&self, id: Uuid) -> Result<Member, SDKError> {
         let member_info = sqlx::query!(
             r#"
-            SELECT id, created_at, updated_at, name, email, role, github_id, google_id, photo_url, password_hash
+            SELECT *
             FROM members
             WHERE id = $1
             "#,

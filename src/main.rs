@@ -4,7 +4,10 @@ use dotenv::dotenv;
 
 use plexo_sdk::{
     backend::engine::new_postgres_engine,
-    resources::projects::operations::{GetProjectsInputBuilder, GetProjectsWhereBuilder, ProjectCrudOperations},
+    resources::projects::{
+        operations::{GetProjectsInputBuilder, GetProjectsWhereBuilder, ProjectCrudOperations},
+        relations::ProjectRelations,
+    },
 };
 use uuid::Uuid;
 
@@ -37,6 +40,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await?;
 
     println!("projects: {:?}", projects);
+
+    let project = projects.first().unwrap();
+
+    let owner = project.owner(&engine).await?;
+
+    println!("owner: {:?}", owner);
 
     // let tasks_filter = GetTasksInputBuilder::default()
     //     .filter(
