@@ -64,6 +64,8 @@ pub struct GetLabelsInput {
 #[builder(pattern = "owned")]
 pub struct GetLabelsWhere {
     #[builder(setter(strip_option), default)]
+    pub ids: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
     pub name: Option<String>,
     #[builder(setter(strip_option), default)]
     pub description: Option<String>,
@@ -82,6 +84,16 @@ impl GetLabelsWhere {
     pub fn compile_sql(&self) -> String {
         let mut and_clauses = Vec::new();
         let mut or_clauses = Vec::new();
+
+        if let Some(ids) = &self.ids {
+            and_clauses.push(format!(
+                "id = ANY(array[{}]::uuid[])",
+                ids.iter()
+                    .map(|x| format!("'{}'", x))
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ));
+        }
 
         if let Some(name) = &self.name {
             and_clauses.push(format!("name = '{}'", name));

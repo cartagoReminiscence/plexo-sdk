@@ -71,6 +71,8 @@ pub struct GetChangesInput {
 #[builder(pattern = "owned")]
 pub struct GetChangesWhere {
     #[builder(setter(strip_option), default)]
+    pub ids: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
     pub owner_id: Option<Uuid>,
     #[builder(setter(strip_option), default)]
     pub resource_id: Option<Uuid>,
@@ -91,6 +93,16 @@ impl GetChangesWhere {
     pub fn compile_sql(&self) -> String {
         let mut and_clauses = Vec::new();
         let mut or_clauses = Vec::new();
+
+        if let Some(ids) = &self.ids {
+            and_clauses.push(format!(
+                "id = ANY(array[{}]::uuid[])",
+                ids.iter()
+                    .map(|x| format!("'{}'", x))
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ));
+        }
 
         if let Some(owner_id) = &self.owner_id {
             and_clauses.push(format!("owner_id = '{}'", owner_id));

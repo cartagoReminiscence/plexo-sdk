@@ -78,6 +78,8 @@ pub struct GetMembersInput {
 #[builder(pattern = "owned")]
 pub struct GetMembersWhere {
     #[builder(setter(strip_option), default)]
+    ids: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
     name: Option<String>,
     #[builder(setter(strip_option), default)]
     email: Option<String>,
@@ -103,6 +105,16 @@ impl GetMembersWhere {
         let mut where_clause = String::new();
         let mut and_clauses = Vec::new();
         let mut or_clauses = Vec::new();
+
+        if let Some(ids) = &self.ids {
+            and_clauses.push(format!(
+                "id = ANY(array[{}]::uuid[])",
+                ids.iter()
+                    .map(|x| format!("'{}'", x))
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ));
+        }
 
         if let Some(name) = &self.name {
             and_clauses.push(format!("name = '{}'", name));

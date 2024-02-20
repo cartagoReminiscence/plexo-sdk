@@ -90,6 +90,8 @@ pub struct UpdateTaskInput {
 #[builder(pattern = "owned")]
 pub struct GetTasksWhere {
     #[builder(setter(strip_option), default)]
+    pub ids: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
     pub owner_id: Option<Uuid>,
     #[builder(setter(strip_option), default)]
     pub status: Option<TaskStatus>,
@@ -120,6 +122,16 @@ pub struct GetTasksWhere {
 impl GetTasksWhere {
     pub fn compile_sql(&self) -> String {
         let mut conditions = Vec::new();
+
+        if let Some(ids) = &self.ids {
+            conditions.push(format!(
+                "id = ANY(array[{}]::uuid[])",
+                ids.iter()
+                    .map(|x| format!("'{}'", x))
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ));
+        }
 
         if let Some(owner_id) = &self.owner_id {
             conditions.push(format!("owner_id = {}", owner_id));

@@ -101,6 +101,7 @@ pub struct GetProjectsWhere {
     #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _and: Option<Vec<GetProjectsWhere>>,
+
     #[oai(skip)]
     #[builder(setter(strip_option), default)]
     pub _or: Option<Vec<GetProjectsWhere>>,

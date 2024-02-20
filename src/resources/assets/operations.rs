@@ -67,6 +67,8 @@ pub struct GetAssetsInput {
 #[builder(pattern = "owned")]
 pub struct GetAssetsWhere {
     #[builder(setter(strip_option), default)]
+    pub ids: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
     pub owner_id: Option<Uuid>,
     #[builder(setter(strip_option), default)]
     pub name: Option<String>,
@@ -85,25 +87,36 @@ pub struct GetAssetsWhere {
 
 impl GetAssetsWhere {
     pub fn compile_sql(&self) -> String {
-        let mut where_clause = String::new();
+        let mut where_clause = Vec::new();
+
+        if let Some(ids) = &self.ids {
+            where_clause.push(format!(
+                "id = ANY(array[{}]::uuid[])",
+                ids.iter()
+                    .map(|x| format!("'{}'", x))
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ));
+        }
+
         if let Some(name) = &self.name {
-            where_clause.push_str(&format!("name = '{}'", name));
+            where_clause.push(format!("name = '{}'", name));
         }
 
         if let Some(kind) = &self.kind {
-            where_clause.push_str(&format!("kind = '{}'", kind));
+            where_clause.push(format!("kind = '{}'", kind));
         }
 
         if let Some(project_id) = &self.project_id {
-            where_clause.push_str(&format!("project_id = '{}'", project_id));
+            where_clause.push(format!("project_id = '{}'", project_id));
         }
 
         if let Some(owner_id) = &self.owner_id {
-            where_clause.push_str(&format!("owner_id = '{}'", owner_id));
+            where_clause.push(format!("owner_id = '{}'", owner_id));
         }
 
         if let Some(_and) = &self._and {
-            where_clause.push_str(&format!(
+            where_clause.push(format!(
                 "({})",
                 _and.iter()
                     .map(|x| x.compile_sql())
@@ -113,7 +126,7 @@ impl GetAssetsWhere {
         }
 
         if let Some(_or) = &self._or {
-            where_clause.push_str(&format!(
+            where_clause.push(format!(
                 "({})",
                 _or.iter()
                     .map(|x| x.compile_sql())
@@ -122,7 +135,7 @@ impl GetAssetsWhere {
             ));
         }
 
-        where_clause
+        where_clause.join(" AND ")
     }
 }
 
@@ -179,7 +192,7 @@ impl AssetCrudOperations for SDKEngine {
         let mut query = "SELECT * FROM assets ".to_string();
 
         if let Some(filter) = input.filter {
-            query.push_str(format!("WHERE {} ", filter.compile_sql()).as_str());
+            query.push_str(&format!("WHERE {} ", filter.compile_sql()));
         }
 
         if let Some(sort_by) = input.sort_by {

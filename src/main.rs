@@ -1,19 +1,10 @@
 use std::{env::var, error::Error, str::FromStr};
 
 use dotenv::dotenv;
+
 use plexo_sdk::{
     backend::engine::new_postgres_engine,
-    cognition::operations::{CognitionOperations, SubdivideTaskInputBuilder, TaskSuggestionInputBuilder},
-    resources::{
-        projects::operations::{
-            GetProjectsInputBuilder, GetProjectsWhere, GetProjectsWhereBuilder, ProjectCrudOperations,
-        },
-        tasks::{
-            operations::{GetTasksInputBuilder, GetTasksWhereBuilder, TaskCrudOperations},
-            // relations::TaskRelations,
-            task::TaskStatus,
-        },
-    },
+    resources::projects::operations::{GetProjectsInputBuilder, GetProjectsWhereBuilder, ProjectCrudOperations},
 };
 use uuid::Uuid;
 
@@ -40,12 +31,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         .name("Plexo".to_string())
                         .build()?,
                 )
-                .limit(1000000000)
+                .limit(1_000_000)
                 .build()?,
         )
         .await?;
 
-    println!("projects: {:?}", projects.len());
+    println!("projects: {:?}", projects);
 
     // let tasks_filter = GetTasksInputBuilder::default()
     //     .filter(
