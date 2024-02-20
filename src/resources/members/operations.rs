@@ -137,6 +137,7 @@ impl GetMembersWhere {
         if !and_clauses.is_empty() {
             where_clause.push_str(&format!("({})", and_clauses.join(" AND ")));
         }
+
         if !or_clauses.is_empty() {
             if !where_clause.is_empty() {
                 where_clause.push_str(" OR ");

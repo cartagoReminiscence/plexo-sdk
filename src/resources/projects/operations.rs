@@ -82,6 +82,8 @@ pub struct GetProjectsInput {
 #[builder(pattern = "owned")]
 pub struct GetProjectsWhere {
     #[builder(setter(strip_option), default)]
+    pub ids: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
     pub name: Option<String>,
     #[builder(setter(strip_option), default)]
     pub prefix: Option<String>,
@@ -106,30 +108,41 @@ pub struct GetProjectsWhere {
 
 impl GetProjectsWhere {
     pub fn compile_sql(&self) -> String {
-        let mut where_clause = String::new();
+        let mut where_clause = Vec::new();
+
+        if let Some(ids) = &self.ids {
+            where_clause.push(format!(
+                "id = ANY(array[{}]::uuid[])",
+                ids.iter()
+                    .map(|x| format!("'{}'", x))
+                    .collect::<Vec<String>>()
+                    .join(",")
+            ));
+        }
+
         if let Some(name) = &self.name {
-            where_clause.push_str(&format!("name = '{}'", name));
+            where_clause.push(format!("name = '{}'", name));
         }
         if let Some(prefix) = &self.prefix {
-            where_clause.push_str(&format!("prefix = '{}'", prefix));
+            where_clause.push(format!("prefix = '{}'", prefix));
         }
         if let Some(owner_id) = &self.owner_id {
-            where_clause.push_str(&format!("owner_id = '{}'", owner_id));
+            where_clause.push(format!("owner_id = '{}'", owner_id));
         }
         if let Some(description) = &self.description {
-            where_clause.push_str(&format!("description = '{}'", description));
+            where_clause.push(format!("description = '{}'", description));
         }
         if let Some(lead_id) = &self.lead_id {
-            where_clause.push_str(&format!("lead_id = '{}'", lead_id));
+            where_clause.push(format!("lead_id = '{}'", lead_id));
         }
         if let Some(start_date) = &self.start_date {
-            where_clause.push_str(&format!("start_date = '{}'", start_date));
+            where_clause.push(format!("start_date = '{}'", start_date));
         }
         if let Some(due_date) = &self.due_date {
-            where_clause.push_str(&format!("due_date = '{}'", due_date));
+            where_clause.push(format!("due_date = '{}'", due_date));
         }
         if let Some(_and) = &self._and {
-            where_clause.push_str(&format!(
+            where_clause.push(format!(
                 "({})",
                 _and.iter()
                     .map(|x| x.compile_sql())
@@ -138,7 +151,7 @@ impl GetProjectsWhere {
             ));
         }
         if let Some(_or) = &self._or {
-            where_clause.push_str(&format!(
+            where_clause.push(format!(
                 "({})",
                 _or.iter()
                     .map(|x| x.compile_sql())
@@ -146,7 +159,8 @@ impl GetProjectsWhere {
                     .join(" OR ")
             ));
         }
-        where_clause
+
+        where_clause.join(" AND ")
     }
 }
 
