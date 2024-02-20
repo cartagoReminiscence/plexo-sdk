@@ -8,10 +8,10 @@ use crate::backend::engine::SDKEngine;
 
 use super::project::{Project, ProjectStatus, ProjectVisibility};
 
-pub struct ProjectLoader(SDKEngine);
+pub struct ProjectLoader(Arc<SDKEngine>);
 
 impl ProjectLoader {
-    pub fn new(e: SDKEngine) -> Self {
+    pub fn new(e: Arc<SDKEngine>) -> Self {
         Self(e)
     }
 }

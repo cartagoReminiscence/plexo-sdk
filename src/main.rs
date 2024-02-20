@@ -1,12 +1,15 @@
-use std::{env::var, error::Error, str::FromStr};
+use std::{env::var, error::Error, str::FromStr, sync::Arc};
 
 use dotenv::dotenv;
 
 use plexo_sdk::{
-    backend::engine::new_postgres_engine,
-    resources::projects::{
-        operations::{GetProjectsInputBuilder, GetProjectsWhereBuilder, ProjectCrudOperations},
-        relations::ProjectRelations,
+    backend::{engine::new_postgres_engine, loaders::SDKLoaders},
+    resources::{
+        projects::{
+            operations::{GetProjectsInputBuilder, GetProjectsWhereBuilder, ProjectCrudOperations},
+            relations::ProjectRelations,
+        },
+        tasks::{operations::TaskCrudOperations, relations::TaskRelations},
     },
 };
 use uuid::Uuid;
@@ -20,6 +23,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let llm_model_name = var("OPENAI_MODEL_NAME").unwrap_or("gpt-3.5-turbo".to_string());
 
     let engine = new_postgres_engine(database_url.as_str(), false, llm_api_key, llm_model_name).await?;
+    let engine = Arc::new(engine);
+
+    let loaders = SDKLoaders::new(engine.clone());
 
     let projects = engine
         .get_projects(
@@ -43,9 +49,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let project = projects.first().unwrap();
 
-    let owner = project.owner(&engine).await?;
+    let project_owner = project.owner(&loaders).await?;
 
-    println!("owner: {:?}", owner);
+    println!("project owner: {:?}", project_owner.name);
+
+    let tasks = engine.get_tasks(None).await?;
+    let task = tasks.first().unwrap();
+
+    let task_owner = task.owner(&loaders).await?;
+
+    println!("task owner: {:?}", task_owner.name);
 
     // let tasks_filter = GetTasksInputBuilder::default()
     //     .filter(
