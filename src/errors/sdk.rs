@@ -16,6 +16,8 @@ pub enum SDKError {
     // EmailAlreadyExists,
     // #[error("Poem error")]
     // PoemError(#[from] poem::error::NotFoundError),
+    #[error("Resource not found")]
+    ResourceNotFound,
     #[error("SQLX Error")]
     SQLXError(#[from] sqlx::Error),
     // #[error("FromStr error")]

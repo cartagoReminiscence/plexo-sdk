@@ -19,6 +19,8 @@ pub struct SDKLoaders {
     pub asset_loader: DataLoader<AssetLoader>,
     pub label_loader: DataLoader<LabelLoader>,
     pub change_loader: DataLoader<ChangeLoader>,
+
+    pub engine: Arc<SDKEngine>,
 }
 
 impl SDKLoaders {
@@ -31,6 +33,8 @@ impl SDKLoaders {
             asset_loader: DataLoader::new(AssetLoader::new(engine.clone()), tokio::spawn),
             label_loader: DataLoader::new(LabelLoader::new(engine.clone()), tokio::spawn),
             change_loader: DataLoader::new(ChangeLoader::new(engine.clone()), tokio::spawn),
+
+            engine,
         }
     }
 }
