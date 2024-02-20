@@ -9,6 +9,7 @@ use poem_openapi::Enum as OpenApiEnum;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, SimpleObject, Object, Clone, Serialize)]
+#[graphql(name = "SDKTask")]
 pub struct Task {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
