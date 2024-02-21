@@ -1,36 +1,82 @@
+use std::env::var;
+
 use async_openai::{config::OpenAIConfig, Client};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 use crate::errors::sdk::SDKError;
 
 #[derive(Clone)]
-pub struct SDKEngine {
-    pub db_pool: Box<Pool<Postgres>>,
-    pub llm_client: Box<Client<OpenAIConfig>>,
+pub struct SDKConfig {
+    pub database_url: String,
+    pub llm_api_key: String,
     pub llm_model_name: String,
+
+    pub admin_default_email: String,
+    pub admin_default_password: String,
 }
 
-pub async fn new_postgres_engine(
-    database_url: &str,
-    with_migration: bool,
-    llm_api_key: String,
-    llm_model_name: String,
-) -> Result<SDKEngine, SDKError> {
-    let pool = PgPoolOptions::new().max_connections(3).connect(database_url).await?;
+impl SDKConfig {
+    pub fn from_env() -> SDKConfig {
+        let database_url = var("DATABASE_URL").unwrap();
+        let llm_api_key = var("OPENAI_API_KEY").unwrap();
+        let llm_model_name = var("OPENAI_MODEL_NAME").unwrap_or("gpt-3.5-turbo".to_string());
+        let admin_default_email = var("ADMIN_DEFAULT_EMAIL").unwrap_or("admin@plexo.app".to_string());
+        let admin_default_password = var("ADMIN_DEFAULT_PASSWORD").unwrap_or("admin".to_string());
 
-    if with_migration {
-        sqlx::migrate!().run(&pool).await?;
+        SDKConfig {
+            database_url,
+            llm_api_key,
+            llm_model_name,
+            admin_default_email,
+            admin_default_password,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct SDKEngine {
+    pub config: SDKConfig,
+    pub db_pool: Box<Pool<Postgres>>,
+    pub llm_client: Box<Client<OpenAIConfig>>,
+    // pub llm_model_name: String,
+}
+
+impl SDKEngine {
+    pub async fn new(config: SDKConfig) -> Result<SDKEngine, SDKError> {
+        let pool = PgPoolOptions::new()
+            .max_connections(3)
+            .connect(config.database_url.as_str())
+            .await?;
+
+        let llm_config = OpenAIConfig::default().with_api_key(config.llm_api_key.clone());
+
+        let llm_client = Box::new(Client::with_config(llm_config));
+
+        let db_pool = Box::new(pool);
+
+        Ok(SDKEngine {
+            config,
+            db_pool,
+            llm_client,
+            // llm_model_name,
+        })
     }
 
-    let config = OpenAIConfig::default().with_api_key(llm_api_key);
+    pub async fn migrate(&self) -> Result<(), SDKError> {
+        sqlx::migrate!().run(self.db_pool.as_ref()).await?;
 
-    let llm_client = Box::new(Client::with_config(config));
+        // let admin = self.get_member_by_email(self.config.admin_default_email.clone()).await;
 
-    let db_pool = Box::new(pool);
+        // if admin.is_err() {
+        //     self.create_member_from_email(
+        //         CreateMemberFromEmailInputBuilder::default()
+        //             .email(self.config.admin_default_email.clone())
+        //             .password_hash(value)
+        //             .build()?,
+        //     )
+        //     .await?;
+        // }
 
-    Ok(SDKEngine {
-        db_pool,
-        llm_client,
-        llm_model_name,
-    })
+        Ok(())
+    }
 }

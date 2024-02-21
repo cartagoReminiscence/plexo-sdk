@@ -28,7 +28,7 @@ impl CognitionCapabilities for SDKEngine {
     async fn chat_completion(&self, system_message: String, user_message: String) -> String {
         let request = CreateChatCompletionRequestArgs::default()
             .max_tokens(1024u16)
-            .model(self.llm_model_name.clone())
+            .model(self.config.llm_model_name.clone())
             .messages([
                 ChatCompletionRequestSystemMessageArgs::default()
                     .content(system_message)

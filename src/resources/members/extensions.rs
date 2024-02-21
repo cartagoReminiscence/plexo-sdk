@@ -12,8 +12,8 @@ use super::member::{Member, MemberRole};
 pub trait MembersExtensionOperations {
     async fn create_member_from_github(&self, input: CreateMemberFromGithubInput) -> Result<Member, SDKError>;
     async fn create_member_from_email(&self, input: CreateMemberFromEmailInput) -> Result<Member, SDKError>;
-    async fn get_member_by_github_id(&self, github_id: String) -> Result<Member, SDKError>;
-    async fn get_member_by_email(&self, email: String) -> Result<Member, SDKError>;
+    async fn get_member_by_github_id(&self, github_id: String) -> Result<Option<Member>, SDKError>;
+    async fn get_member_by_email(&self, email: String) -> Result<Option<Member>, SDKError>;
 }
 
 #[derive(Default, Builder, InputObject)]
@@ -100,7 +100,7 @@ impl MembersExtensionOperations for SDKEngine {
         })
     }
 
-    async fn get_member_by_github_id(&self, github_id: String) -> Result<Member, SDKError> {
+    async fn get_member_by_github_id(&self, github_id: String) -> Result<Option<Member>, SDKError> {
         let member_info = sqlx::query!(
             "
             SELECT * FROM members
@@ -111,7 +111,7 @@ impl MembersExtensionOperations for SDKEngine {
         .fetch_one(&*self.db_pool)
         .await?;
 
-        Ok(Member {
+        Ok(Some(Member {
             id: member_info.id,
             email: member_info.email,
             name: member_info.name,
@@ -125,10 +125,10 @@ impl MembersExtensionOperations for SDKEngine {
                 .and_then(|a| MemberRole::from_str(&a).ok())
                 .unwrap_or_default(),
             password_hash: member_info.password_hash,
-        })
+        }))
     }
 
-    async fn get_member_by_email(&self, email: String) -> Result<Member, SDKError> {
+    async fn get_member_by_email(&self, email: String) -> Result<Option<Member>, SDKError> {
         let member_info = sqlx::query!(
             "
             SELECT * FROM members
@@ -139,7 +139,7 @@ impl MembersExtensionOperations for SDKEngine {
         .fetch_one(&*self.db_pool)
         .await?;
 
-        Ok(Member {
+        Ok(Some(Member {
             id: member_info.id,
             email: member_info.email,
             name: member_info.name,
@@ -153,6 +153,6 @@ impl MembersExtensionOperations for SDKEngine {
                 .and_then(|a| MemberRole::from_str(&a).ok())
                 .unwrap_or_default(),
             password_hash: member_info.password_hash,
-        })
+        }))
     }
 }
