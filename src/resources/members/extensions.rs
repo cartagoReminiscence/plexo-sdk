@@ -31,6 +31,8 @@ pub struct CreateMemberFromEmailInput {
     email: String,
     name: String,
     password_hash: String,
+
+    #[builder(setter(strip_option), default)]
     photo_url: Option<String>,
 }
 

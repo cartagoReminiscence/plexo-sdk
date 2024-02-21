@@ -65,18 +65,6 @@ impl SDKEngine {
     pub async fn migrate(&self) -> Result<(), SDKError> {
         sqlx::migrate!().run(self.db_pool.as_ref()).await?;
 
-        // let admin = self.get_member_by_email(self.config.admin_default_email.clone()).await;
-
-        // if admin.is_err() {
-        //     self.create_member_from_email(
-        //         CreateMemberFromEmailInputBuilder::default()
-        //             .email(self.config.admin_default_email.clone())
-        //             .password_hash(value)
-        //             .build()?,
-        //     )
-        //     .await?;
-        // }
-
         Ok(())
     }
 }

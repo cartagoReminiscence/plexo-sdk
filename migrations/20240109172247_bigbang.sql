@@ -1,13 +1,13 @@
-create table _sqlx_migrations
-(
-    version        bigint                                 not null
-        primary key,
-    description    text                                   not null,
-    installed_on   timestamp with time zone default now() not null,
-    success        boolean                                not null,
-    checksum       bytea                                  not null,
-    execution_time bigint                                 not null
-);
+-- create table _sqlx_migrations
+-- (
+--     version        bigint                                 not null
+--         primary key,
+--     description    text                                   not null,
+--     installed_on   timestamp with time zone default now() not null,
+--     success        boolean                                not null,
+--     checksum       bytea                                  not null,
+--     execution_time bigint                                 not null
+-- );
 
 -- alter table _sqlx_migrations
 --     owner to bregydoc;
