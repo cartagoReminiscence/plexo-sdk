@@ -1,5 +1,6 @@
 use std::{env::var, error::Error, str::FromStr, sync::Arc};
 
+// use chrono::Local;
 use dotenv::dotenv;
 
 use plexo_sdk::{
@@ -9,7 +10,13 @@ use plexo_sdk::{
             operations::{GetProjectsInputBuilder, GetProjectsWhereBuilder, ProjectCrudOperations},
             relations::ProjectRelations,
         },
-        tasks::{operations::TaskCrudOperations, relations::TaskRelations},
+        tasks::{
+            // extensions::{CreateTasksInputBuilder, TasksExtensionOperations},
+            // operations::CreateTaskInputBuilder.
+            // task::TaskStatus,
+            operations::TaskCrudOperations,
+            relations::TaskRelations,
+        },
     },
 };
 use uuid::Uuid;
@@ -60,44 +67,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("task owner: {:?}", task_owner.name);
 
-    // let tasks_filter = GetTasksInputBuilder::default()
-    //     .filter(
-    //         GetTasksWhereBuilder::default()
-    //             ._or(vec![
-    //                 GetTasksWhereBuilder::default().status(TaskStatus::InProgress).build()?,
-    //                 GetTasksWhereBuilder::default().status(TaskStatus::Done).build()?,
+    // let tasks = engine
+    //     .create_tasks(
+    //         CreateTasksInputBuilder::default()
+    //             .tasks(vec![
+    //                 CreateTaskInputBuilder::default()
+    //                     .title("task 009".to_string())
+    //                     .owner_id(task_owner.id)
+    //                     .build()?,
+    //                 CreateTaskInputBuilder::default()
+    //                     .title("task 0010".to_string())
+    //                     .status(TaskStatus::Done)
+    //                     .due_date(Local::now().into())
+    //                     .owner_id(task_owner.id)
+    //                     .build()?,
     //             ])
     //             .build()?,
     //     )
-    //     .limit(10)
-    //     .build()?;
-
-    // let tasks = engine.get_tasks(Some(tasks_filter)).await?;
-
-    // println!("total tasks: {}", tasks.len());
-
-    // let suggestion = engine
-    //     .get_suggestions(
-    //         TaskSuggestionInputBuilder::default()
-    //             .title("test".to_string())
-    //             .build()?,
-    //     )
     //     .await?;
 
-    // println!("suggestion: {:?}", suggestion);
-
-    // let task_id = tasks.first().unwrap().id;
-
-    // let subtasks = engine
-    //     .subdivide_task(
-    //         SubdivideTaskInputBuilder::default()
-    //             .subtasks(3)
-    //             .task_id(task_id)
-    //             .build()?,
-    //     )
-    //     .await?;
-
-    // println!("subtasks: {:?}", subtasks);
+    // println!("\ncreated tasks: {:?}", tasks);
 
     Ok(())
 }

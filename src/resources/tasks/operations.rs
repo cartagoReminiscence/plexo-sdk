@@ -40,7 +40,7 @@ pub struct GetTasksInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateTaskInput {
     pub title: String,
