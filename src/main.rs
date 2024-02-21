@@ -1,6 +1,7 @@
 use std::{env::var, error::Error, str::FromStr, sync::Arc};
 
-// use chrono::Local;
+use chrono::Local;
+
 use dotenv::dotenv;
 
 use plexo_sdk::{
@@ -11,11 +12,11 @@ use plexo_sdk::{
             relations::ProjectRelations,
         },
         tasks::{
-            // extensions::{CreateTasksInputBuilder, TasksExtensionOperations},
-            // operations::CreateTaskInputBuilder.
-            // task::TaskStatus,
+            extensions::{CreateTasksInputBuilder, TasksExtensionOperations},
+            operations::CreateTaskInputBuilder,
             operations::TaskCrudOperations,
             relations::TaskRelations,
+            task::TaskStatus,
         },
     },
 };
@@ -67,26 +68,26 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("task owner: {:?}", task_owner.name);
 
-    // let tasks = engine
-    //     .create_tasks(
-    //         CreateTasksInputBuilder::default()
-    //             .tasks(vec![
-    //                 CreateTaskInputBuilder::default()
-    //                     .title("task 009".to_string())
-    //                     .owner_id(task_owner.id)
-    //                     .build()?,
-    //                 CreateTaskInputBuilder::default()
-    //                     .title("task 0010".to_string())
-    //                     .status(TaskStatus::Done)
-    //                     .due_date(Local::now().into())
-    //                     .owner_id(task_owner.id)
-    //                     .build()?,
-    //             ])
-    //             .build()?,
-    //     )
-    //     .await?;
+    let tasks = engine
+        .create_tasks(
+            CreateTasksInputBuilder::default()
+                .tasks(vec![
+                    CreateTaskInputBuilder::default()
+                        .title("task 011".to_string())
+                        .owner_id(task_owner.id)
+                        .build()?,
+                    CreateTaskInputBuilder::default()
+                        .title("task 0012".to_string())
+                        .status(TaskStatus::Done)
+                        .due_date(Local::now().into())
+                        .owner_id(task_owner.id)
+                        .build()?,
+                ])
+                .build()?,
+        )
+        .await?;
 
-    // println!("\ncreated tasks: {:?}", tasks);
+    println!("\ncreated tasks: {:?}", tasks);
 
     Ok(())
 }

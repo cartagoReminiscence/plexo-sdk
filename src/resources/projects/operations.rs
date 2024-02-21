@@ -8,7 +8,11 @@ use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
-use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{
+    backend::engine::SDKEngine,
+    common::commons::{SortOrder, UpdateListInput},
+    errors::sdk::SDKError,
+};
 
 use super::project::{Project, ProjectStatus, ProjectVisibility};
 
@@ -31,6 +35,8 @@ pub struct CreateProjectInput {
 
     #[builder(setter(strip_option), default)]
     pub status: Option<ProjectStatus>,
+    #[builder(setter(strip_option), default)]
+    pub visibility: Option<ProjectVisibility>,
 
     #[builder(setter(strip_option), default)]
     pub prefix: Option<String>,
@@ -42,6 +48,11 @@ pub struct CreateProjectInput {
     pub start_date: Option<DateTime<Utc>>,
     #[builder(setter(strip_option), default)]
     pub due_date: Option<DateTime<Utc>>,
+
+    #[builder(setter(strip_option), default)]
+    pub members: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
+    pub teams: Option<Vec<Uuid>>,
 }
 
 #[derive(Default, Builder, Object, InputObject)]
@@ -59,6 +70,16 @@ pub struct UpdateProjectInput {
     pub start_date: Option<DateTime<Utc>>,
     #[builder(setter(strip_option), default)]
     pub due_date: Option<DateTime<Utc>>,
+
+    #[builder(setter(strip_option), default)]
+    pub status: Option<ProjectStatus>,
+    #[builder(setter(strip_option), default)]
+    pub visibility: Option<ProjectVisibility>,
+
+    #[builder(setter(strip_option), default)]
+    pub members: Option<UpdateListInput>,
+    #[builder(setter(strip_option), default)]
+    pub teams: Option<UpdateListInput>,
 }
 
 #[derive(Default, Builder, Object, InputObject)]
@@ -168,7 +189,9 @@ impl GetProjectsWhere {
 #[async_trait]
 impl ProjectCrudOperations for SDKEngine {
     async fn create_project(&self, input: CreateProjectInput) -> Result<Project, SDKError> {
-        let project_final_info = sqlx::query!(
+        let mut tx = self.db_pool.as_ref().begin().await?;
+
+        let project = sqlx::query!(
             r#"
             INSERT INTO projects (name, description, owner_id, status)
             VALUES ($1, $2, $3, $4)
@@ -179,25 +202,59 @@ impl ProjectCrudOperations for SDKEngine {
             input.owner_id,
             input.status.unwrap_or_default().to_string(),
         )
-        .fetch_one(self.db_pool.as_ref())
+        .fetch_one(&mut *tx)
         .await?;
 
+        if let Some(members) = input.members {
+            for member in members {
+                sqlx::query!(
+                    r#"
+                        INSERT INTO members_by_projects (member_id, project_id)
+                        VALUES ($1, $2)
+                        "#,
+                    member,
+                    project.id,
+                )
+                .execute(&mut *tx)
+                .await
+                .unwrap();
+            }
+        }
+
+        if let Some(teams) = input.teams {
+            for team in teams {
+                sqlx::query!(
+                    r#"
+                        INSERT INTO teams_by_projects (team_id, project_id)
+                        VALUES ($1, $2)
+                        "#,
+                    team,
+                    project.id,
+                )
+                .execute(&mut *tx)
+                .await
+                .unwrap();
+            }
+        }
+
+        tx.commit().await?;
+
         Ok(Project {
-            id: project_final_info.id,
-            created_at: project_final_info.created_at,
-            updated_at: project_final_info.updated_at,
-            name: project_final_info.name,
-            prefix: project_final_info.prefix,
-            owner_id: project_final_info.owner_id,
-            description: project_final_info.description,
-            lead_id: project_final_info.lead_id,
-            start_date: project_final_info.start_date,
-            due_date: project_final_info.due_date,
-            status: project_final_info
+            id: project.id,
+            created_at: project.created_at,
+            updated_at: project.updated_at,
+            name: project.name,
+            prefix: project.prefix,
+            owner_id: project.owner_id,
+            description: project.description,
+            lead_id: project.lead_id,
+            start_date: project.start_date,
+            due_date: project.due_date,
+            status: project
                 .status
                 .and_then(|a| ProjectStatus::from_str(&a).ok())
                 .unwrap_or_default(),
-            visibility: project_final_info
+            visibility: project
                 .visibility
                 .and_then(|a| ProjectVisibility::from_str(&a).ok())
                 .unwrap_or_default(),
@@ -237,6 +294,8 @@ impl ProjectCrudOperations for SDKEngine {
     }
 
     async fn update_project(&self, id: Uuid, input: UpdateProjectInput) -> Result<Project, SDKError> {
+        let mut tx = self.db_pool.as_ref().begin().await?;
+
         let project_final_info = sqlx::query!(
             r#"
             UPDATE projects
@@ -250,8 +309,68 @@ impl ProjectCrudOperations for SDKEngine {
             input.description,
             id,
         )
-        .fetch_one(self.db_pool.as_ref())
+        .fetch_one(&mut *tx)
         .await?;
+
+        if let Some(members) = input.members {
+            for member in members.add {
+                sqlx::query!(
+                    r#"
+                        INSERT INTO members_by_projects (member_id, project_id)
+                        VALUES ($1, $2)
+                        "#,
+                    member,
+                    id,
+                )
+                .execute(&mut *tx)
+                .await
+                .unwrap();
+            }
+
+            for member in members.remove {
+                sqlx::query!(
+                    r#"
+                        DELETE FROM members_by_projects
+                        WHERE member_id = $1 AND project_id = $2
+                        "#,
+                    member,
+                    id,
+                )
+                .execute(&mut *tx)
+                .await
+                .unwrap();
+            }
+        }
+
+        if let Some(teams) = input.teams {
+            for team in teams.add {
+                sqlx::query!(
+                    r#"
+                        INSERT INTO teams_by_projects (team_id, project_id)
+                        VALUES ($1, $2)
+                        "#,
+                    team,
+                    id,
+                )
+                .execute(&mut *tx)
+                .await
+                .unwrap();
+            }
+
+            for team in teams.remove {
+                sqlx::query!(
+                    r#"
+                        DELETE FROM teams_by_projects
+                        WHERE team_id = $1 AND project_id = $2
+                        "#,
+                    team,
+                    id,
+                )
+                .execute(&mut *tx)
+                .await
+                .unwrap();
+            }
+        }
 
         Ok(Project {
             id: project_final_info.id,

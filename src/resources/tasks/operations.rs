@@ -10,7 +10,7 @@ use sqlx::Row;
 use uuid::Uuid;
 
 use crate::backend::engine::SDKEngine;
-use crate::common::commons::SortOrder;
+use crate::common::commons::{SortOrder, UpdateListInput};
 use crate::errors::sdk::SDKError;
 use crate::resources::tasks::task::{Task, TaskPriority, TaskStatus};
 
@@ -63,6 +63,17 @@ pub struct CreateTaskInput {
     pub lead_id: Option<Uuid>,
     #[builder(setter(strip_option), default)]
     pub parent_id: Option<Uuid>,
+
+    #[builder(setter(strip_option), default)]
+    pub labels: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
+    pub assignees: Option<Vec<Uuid>>,
+    #[oai(skip)]
+    #[builder(setter(strip_option), default)]
+    pub subtasks: Option<Vec<CreateTaskInput>>,
+
+    #[builder(setter(strip_option), default)]
+    pub assets: Option<Vec<Uuid>>,
 }
 
 #[derive(Default, Builder, Object, InputObject)]
@@ -84,6 +95,13 @@ pub struct UpdateTaskInput {
     pub lead_id: Option<Uuid>,
     #[builder(setter(strip_option), default)]
     pub parent_id: Option<Uuid>,
+
+    #[builder(setter(strip_option), default)]
+    pub labels: Option<UpdateListInput>,
+    #[builder(setter(strip_option), default)]
+    pub assignees: Option<UpdateListInput>,
+    #[builder(setter(strip_option), default)]
+    pub assets: Option<UpdateListInput>,
 }
 
 #[derive(Default, Builder, Object, InputObject)]
@@ -186,7 +204,9 @@ impl GetTasksWhere {
 #[async_trait]
 impl TaskCrudOperations for SDKEngine {
     async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError> {
-        let task_final_info = sqlx::query!(
+        let mut tx = self.db_pool.begin().await?;
+
+        let task = sqlx::query!(
             r#"
             INSERT INTO tasks (title, description, owner_id, status, priority, due_date, project_id, lead_id, parent_id)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -202,29 +222,86 @@ impl TaskCrudOperations for SDKEngine {
             input.lead_id,
             input.parent_id,
         )
-        .fetch_one(self.db_pool.as_ref())
+        .fetch_one(&mut *tx)
         .await?;
 
+        if let Some(labels) = input.labels {
+            for label in labels {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO labels_by_tasks (task_id, label_id)
+                    VALUES ($1, $2)
+                    "#,
+                    task.id,
+                    label,
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+
+        if let Some(assignees) = input.assignees {
+            for assignee in assignees {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO tasks_by_assignees (task_id, assignee_id)
+                    VALUES ($1, $2)
+                    "#,
+                    task.id,
+                    assignee,
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+
+        if let Some(subtasks) = input.subtasks {
+            for mut subtask in subtasks {
+                if subtask.parent_id.is_none() {
+                    subtask.parent_id = Some(task.id);
+                }
+
+                self.create_task(subtask).await?;
+            }
+        }
+
+        // if let Some(assets) = input.assets {
+        //     for asset in assets {
+        //         sqlx::query!(
+        //             r#"
+        //             INSERT INTO assets_by_tasks (task_id, asset_id)
+        //             VALUES ($1, $2)
+        //             "#,
+        //             task.id,
+        //             asset,
+        //         )
+        //         .execute(&mut *tx)
+        //         .await?;
+        //     }
+        // }
+
+        tx.commit().await?;
+
         let task = Task {
-            id: task_final_info.id,
-            created_at: task_final_info.created_at,
-            updated_at: task_final_info.updated_at,
-            title: task_final_info.title,
-            description: task_final_info.description,
-            status: task_final_info
+            id: task.id,
+            created_at: task.created_at,
+            updated_at: task.updated_at,
+            title: task.title,
+            description: task.description,
+            status: task
                 .status
                 .and_then(|a| TaskStatus::from_str(&a).ok())
                 .unwrap_or_default(),
-            priority: task_final_info
+            priority: task
                 .priority
                 .and_then(|a| TaskPriority::from_str(&a).ok())
                 .unwrap_or_default(),
-            due_date: task_final_info.due_date,
-            project_id: task_final_info.project_id,
-            lead_id: task_final_info.lead_id,
-            owner_id: task_final_info.owner_id,
-            count: task_final_info.count,
-            parent_id: task_final_info.parent_id,
+            due_date: task.due_date,
+            project_id: task.project_id,
+            lead_id: task.lead_id,
+            owner_id: task.owner_id,
+            count: task.count,
+            parent_id: task.parent_id,
         };
 
         Ok(task)
@@ -266,6 +343,8 @@ impl TaskCrudOperations for SDKEngine {
     }
 
     async fn update_task(&self, id: Uuid, input: UpdateTaskInput) -> Result<Task, SDKError> {
+        let mut tx = self.db_pool.begin().await?;
+
         let task_final_info = sqlx::query!(
             r#"
             UPDATE tasks
@@ -291,8 +370,91 @@ impl TaskCrudOperations for SDKEngine {
             input.parent_id,
             id,
         )
-        .fetch_one(self.db_pool.as_ref())
+        .fetch_one(&mut *tx)
         .await?;
+
+        if let Some(labels) = input.labels {
+            for label in labels.add {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO labels_by_tasks (task_id, label_id)
+                    VALUES ($1, $2)
+                    "#,
+                    id,
+                    label,
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+
+            for label in labels.remove {
+                sqlx::query!(
+                    r#"
+                    DELETE FROM labels_by_tasks WHERE task_id = $1 AND label_id = $2
+                    "#,
+                    id,
+                    label,
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+
+        if let Some(assignees) = input.assignees {
+            for assignee in assignees.add {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO tasks_by_assignees (task_id, assignee_id)
+                    VALUES ($1, $2)
+                    "#,
+                    id,
+                    assignee,
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+
+            for assignee in assignees.remove {
+                sqlx::query!(
+                    r#"
+                    DELETE FROM tasks_by_assignees WHERE task_id = $1 AND assignee_id = $2
+                    "#,
+                    id,
+                    assignee,
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+
+        tx.commit().await?;
+
+        // if let Some(assets) = input.assets {
+        //     for asset in assets.add {
+        //         sqlx::query!(
+        //             r#"
+        //             INSERT INTO assets_by_tasks (task_id, asset_id)
+        //             VALUES ($1, $2)
+        //             "#,
+        //             id,
+        //             asset,
+        //         )
+        //         .execute(self.db_pool.as_ref())
+        //         .await?;
+        //     }
+
+        //     for asset in assets.remove {
+        //         sqlx::query!(
+        //             r#"
+        //             DELETE FROM assets_by_tasks WHERE task_id = $1 AND asset_id = $2
+        //             "#,
+        //             id,
+        //             asset,
+        //         )
+        //         .execute(self.db_pool.as_ref())
+        //         .await?;
+        //     }
+        // }
 
         let task = Task {
             id: task_final_info.id,

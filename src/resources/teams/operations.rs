@@ -8,7 +8,11 @@ use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
-use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{
+    backend::engine::SDKEngine,
+    common::commons::{SortOrder, UpdateListInput},
+    errors::sdk::SDKError,
+};
 
 use super::team::{Team, TeamVisibility};
 
@@ -32,6 +36,11 @@ pub struct CreateTeamInput {
 
     #[builder(setter(strip_option), default)]
     pub prefix: Option<String>,
+
+    #[builder(setter(strip_option), default)]
+    pub members: Option<Vec<Uuid>>,
+    #[builder(setter(strip_option), default)]
+    pub projects: Option<Vec<Uuid>>,
 }
 
 #[derive(Default, Object, Builder, InputObject)]
@@ -45,6 +54,11 @@ pub struct UpdateTeamInput {
     pub visibility: Option<TeamVisibility>,
     #[builder(setter(strip_option), default)]
     pub prefix: Option<String>,
+
+    #[builder(setter(strip_option), default)]
+    pub members: Option<UpdateListInput>,
+    #[builder(setter(strip_option), default)]
+    pub teams: Option<UpdateListInput>,
 }
 
 #[derive(Default, Object, Builder, InputObject)]
@@ -139,6 +153,8 @@ impl GetTeamsWhere {
 #[async_trait]
 impl TeamCrudOperations for SDKEngine {
     async fn create_team(&self, input: CreateTeamInput) -> Result<Team, SDKError> {
+        let mut tx = self.db_pool.begin().await?;
+
         let team_final_info = sqlx::query!(
             r#"
             INSERT INTO teams (name, owner_id, visibility, prefix)
@@ -150,8 +166,40 @@ impl TeamCrudOperations for SDKEngine {
             input.visibility.to_string(),
             input.prefix
         )
-        .fetch_one(self.db_pool.as_ref())
+        .fetch_one(&mut *tx)
         .await?;
+
+        if let Some(members) = input.members {
+            for member_id in members {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO members_by_teams (team_id, member_id)
+                    VALUES ($1, $2)
+                    "#,
+                    team_final_info.id,
+                    member_id
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+
+        if let Some(projects) = input.projects {
+            for project_id in projects {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO teams_by_projects (team_id, project_id)
+                    VALUES ($1, $2)
+                    "#,
+                    team_final_info.id,
+                    project_id
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+
+        tx.commit().await?;
 
         let team = Team {
             id: team_final_info.id,
@@ -242,6 +290,8 @@ impl TeamCrudOperations for SDKEngine {
     }
 
     async fn update_team(&self, id: Uuid, input: UpdateTeamInput) -> Result<Team, SDKError> {
+        let mut tx = self.db_pool.begin().await?;
+
         let team_final_info = sqlx::query!(
             r#"
             UPDATE teams
@@ -260,8 +310,64 @@ impl TeamCrudOperations for SDKEngine {
             input.prefix,
             id,
         )
-        .fetch_one(self.db_pool.as_ref())
+        .fetch_one(&mut *tx)
         .await?;
+
+        if let Some(members) = input.members {
+            for member_id in members.add {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO members_by_teams (team_id, member_id)
+                    VALUES ($1, $2)
+                    "#,
+                    id,
+                    member_id
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+
+            for member_id in members.remove {
+                sqlx::query!(
+                    r#"
+                    DELETE FROM members_by_teams
+                    WHERE team_id = $1 AND member_id = $2
+                    "#,
+                    id,
+                    member_id
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+
+        if let Some(projects) = input.teams {
+            for project_id in projects.add {
+                sqlx::query!(
+                    r#"
+                    INSERT INTO teams_by_projects (team_id, project_id)
+                    VALUES ($1, $2)
+                    "#,
+                    id,
+                    project_id
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+
+            for project_id in projects.remove {
+                sqlx::query!(
+                    r#"
+                    DELETE FROM teams_by_projects
+                    WHERE team_id = $1 AND project_id = $2
+                    "#,
+                    id,
+                    project_id
+                )
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
 
         let team = Team {
             id: team_final_info.id,
