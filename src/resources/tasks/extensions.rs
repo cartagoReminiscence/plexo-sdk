@@ -4,11 +4,12 @@ use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
 use sqlx::Row;
+use uuid::Uuid;
 
 use crate::{backend::engine::SDKEngine, errors::sdk::SDKError};
 
 use super::{
-    operations::CreateTaskInput,
+    operations::{CreateTaskInput, TaskCrudOperations},
     task::{Task, TaskPriority, TaskStatus},
 };
 
@@ -26,6 +27,8 @@ pub trait TasksExtensionOperations {
 #[async_trait]
 impl TasksExtensionOperations for SDKEngine {
     async fn create_tasks(&self, input: CreateTasksInput) -> Result<Vec<Task>, SDKError> {
+        let mut tx = self.db_pool.begin().await?;
+
         let values = input
             .tasks
             .iter()
@@ -57,7 +60,54 @@ impl TasksExtensionOperations for SDKEngine {
             values.join(", ")
         );
 
-        let tasks = sqlx::query(query.as_str()).fetch_all(self.db_pool.as_ref()).await?;
+        let tasks = sqlx::query(query.as_str()).fetch_all(&mut *tx).await?;
+
+        for (i, input_task) in input.tasks.iter().enumerate() {
+            let task = &tasks[i];
+            let task_id = task.get::<Uuid, _>("id");
+
+            if let Some(labels) = input_task.labels.clone() {
+                for label in labels {
+                    sqlx::query!(
+                        r#"
+                    INSERT INTO labels_by_tasks (task_id, label_id)
+                    VALUES ($1, $2)
+                    "#,
+                        task_id,
+                        label,
+                    )
+                    .execute(&mut *tx)
+                    .await?;
+                }
+            }
+
+            if let Some(assignees) = input_task.assignees.clone() {
+                for assignee in assignees {
+                    sqlx::query!(
+                        r#"
+                        INSERT INTO tasks_by_assignees (task_id, assignee_id)
+                        VALUES ($1, $2)
+                        "#,
+                        task_id,
+                        assignee,
+                    )
+                    .execute(&mut *tx)
+                    .await?;
+                }
+            }
+
+            if let Some(subtasks) = input_task.subtasks.clone() {
+                for mut subtask in subtasks {
+                    if subtask.parent_id.is_none() {
+                        subtask.parent_id = Some(task_id);
+                    }
+
+                    self.create_task(subtask).await?;
+                }
+            }
+        }
+
+        tx.commit().await?;
 
         Ok(tasks
             .iter()
