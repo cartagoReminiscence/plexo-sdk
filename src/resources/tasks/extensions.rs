@@ -64,7 +64,9 @@ impl TasksExtensionOperations for SDKEngine {
 
         for (i, input_task) in input.tasks.iter().enumerate() {
             let task = &tasks[i];
+
             let task_id = task.get::<Uuid, _>("id");
+            let task_owner_id = task.get::<Uuid, _>("owner_id");
 
             if let Some(labels) = input_task.labels.clone() {
                 for label in labels {
@@ -98,6 +100,8 @@ impl TasksExtensionOperations for SDKEngine {
 
             if let Some(subtasks) = input_task.subtasks.clone() {
                 for mut subtask in subtasks {
+                    subtask.owner_id = task_owner_id;
+
                     if subtask.parent_id.is_none() {
                         subtask.parent_id = Some(task_id);
                     }
