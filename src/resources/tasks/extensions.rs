@@ -3,6 +3,7 @@ use std::str::FromStr;
 use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
+use serde::Serialize;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -13,7 +14,7 @@ use super::{
     task::{Task, TaskPriority, TaskStatus},
 };
 
-#[derive(Default, Builder, InputObject)]
+#[derive(Default, Builder, InputObject, Clone, Serialize)]
 #[builder(pattern = "owned")]
 pub struct CreateTasksInput {
     pub tasks: Vec<CreateTaskInput>,
@@ -28,6 +29,7 @@ pub trait TasksExtensionOperations {
 impl TasksExtensionOperations for SDKEngine {
     async fn create_tasks(&self, input: CreateTasksInput) -> Result<Vec<Task>, SDKError> {
         let mut tx = self.db_pool.begin().await?;
+        // let saved_input = input.clone();
 
         let values = input
             .tasks
@@ -113,7 +115,7 @@ impl TasksExtensionOperations for SDKEngine {
 
         tx.commit().await?;
 
-        Ok(tasks
+        let tasks: Vec<Task> = tasks
             .iter()
             .map(|task_info| Task {
                 id: task_info.get("id"),
@@ -136,6 +138,39 @@ impl TasksExtensionOperations for SDKEngine {
                 count: task_info.get("count"),
                 parent_id: task_info.get("parent_id"),
             })
-            .collect())
+            .collect();
+
+        // if self.config.with_changes_registration {
+        //     let tasks = tasks.clone();
+        //     let engine = self.clone();
+
+        //     task::spawn(async move {
+        //         for task in tasks {
+        //             let change = engine
+        //                 .create_change(
+        //                     CreateChangeInputBuilder::default()
+        //                         .owner_id(task.owner_id)
+        //                         .resource_id(task.id)
+        //                         .operation(ChangeOperation::Create)
+        //                         .resource_type(ChangeResourceType::Task)
+        //                         .diff_json(
+        //                             serde_json::to_string(&json!({
+        //                                 "input": saved_input,
+        //                                 "result": task,
+        //                             }))
+        //                             .unwrap(),
+        //                         )
+        //                         .build()
+        //                         .unwrap(),
+        //                 )
+        //                 .await
+        //                 .unwrap();
+
+        //             println!("change registered 2: {} | {}", change.operation, change.resource_type);
+        //         }
+        //     });
+        // }
+
+        Ok(tasks)
     }
 }

@@ -3,9 +3,10 @@ use chrono::{DateTime, Utc};
 
 use poem_openapi::Object;
 
+use serde::Serialize;
 use uuid::Uuid;
 
-#[derive(Debug, SimpleObject, Object, Clone)]
+#[derive(Debug, SimpleObject, Object, Clone, Serialize)]
 #[graphql(name = "SDKLabel")]
 pub struct Label {
     pub id: Uuid,

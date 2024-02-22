@@ -6,12 +6,17 @@ use chrono::{DateTime, Utc};
 
 use derive_builder::Builder;
 use poem_openapi::Object;
+use serde::Serialize;
+// use serde_json::json;
 use sqlx::Row;
+// use tokio::task;
 use uuid::Uuid;
 
 use crate::backend::engine::SDKEngine;
 use crate::common::commons::{SortOrder, UpdateListInput};
 use crate::errors::sdk::SDKError;
+// use crate::resources::changes::change::{ChangeOperation, ChangeResourceType};
+// use crate::resources::changes::operations::{ChangeCrudOperations, CreateChangeInputBuilder};
 use crate::resources::tasks::task::{Task, TaskPriority, TaskStatus};
 
 #[async_trait]
@@ -40,7 +45,7 @@ pub struct GetTasksInput {
     pub offset: Option<i32>,
 }
 
-#[derive(Clone, Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct CreateTaskInput {
     pub title: String,
@@ -76,7 +81,7 @@ pub struct CreateTaskInput {
     pub assets: Option<Vec<Uuid>>,
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Default, Builder, Object, InputObject, Serialize, Clone)]
 #[builder(pattern = "owned")]
 pub struct UpdateTaskInput {
     #[builder(setter(strip_option), default)]
@@ -205,6 +210,7 @@ impl GetTasksWhere {
 impl TaskCrudOperations for SDKEngine {
     async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError> {
         let mut tx = self.db_pool.begin().await?;
+        // let saved_input = input.clone();
 
         let task = sqlx::query!(
             r#"
@@ -304,6 +310,36 @@ impl TaskCrudOperations for SDKEngine {
             parent_id: task.parent_id,
         };
 
+        // if self.config.with_changes_registration {
+        //     let input = saved_input.clone();
+        //     let task = task.clone();
+        //     let engine = self.clone();
+
+        //     task::spawn(async move {
+        //         let change = engine
+        //             .create_change(
+        //                 CreateChangeInputBuilder::default()
+        //                     .owner_id(task.owner_id)
+        //                     .resource_id(task.id)
+        //                     .operation(ChangeOperation::Create)
+        //                     .resource_type(ChangeResourceType::Task)
+        //                     .diff_json(
+        //                         serde_json::to_string(&json!({
+        //                             "input": input,
+        //                             "result": task,
+        //                         }))
+        //                         .unwrap(),
+        //                     )
+        //                     .build()
+        //                     .unwrap(),
+        //             )
+        //             .await
+        //             .unwrap();
+
+        //         println!("change registered 1: {} | {}", change.operation, change.resource_type);
+        //     });
+        // }
+
         Ok(task)
     }
 
@@ -344,6 +380,8 @@ impl TaskCrudOperations for SDKEngine {
 
     async fn update_task(&self, id: Uuid, input: UpdateTaskInput) -> Result<Task, SDKError> {
         let mut tx = self.db_pool.begin().await?;
+
+        // let saved_input = input.clone();
 
         let task_final_info = sqlx::query!(
             r#"
@@ -478,6 +516,33 @@ impl TaskCrudOperations for SDKEngine {
             parent_id: task_final_info.parent_id,
         };
 
+        // if self.config.with_changes_registration {
+        //     let task = task.clone();
+        //     let engine = self.clone();
+
+        //     tokio::spawn(async move {
+        //         engine
+        //             .create_change(
+        //                 CreateChangeInputBuilder::default()
+        //                     .owner_id(task.owner_id)
+        //                     .resource_id(task.id)
+        //                     .operation(ChangeOperation::Update)
+        //                     .resource_type(ChangeResourceType::Task)
+        //                     .diff_json(
+        //                         serde_json::to_string(&json!({
+        //                             "input": saved_input,
+        //                             "result": task,
+        //                         }))
+        //                         .unwrap(),
+        //                     )
+        //                     .build()
+        //                     .unwrap(),
+        //             )
+        //             .await
+        //             .unwrap();
+        //     });
+        // }
+
         Ok(task)
     }
 
@@ -513,6 +578,34 @@ impl TaskCrudOperations for SDKEngine {
             count: task_info.count,
             parent_id: task_info.parent_id,
         };
+
+        // if self.config.with_changes_registration {
+        //     let task = task.clone();
+        //     let engine = self.clone();
+
+        //     tokio::spawn(async move {
+        //         let change = engine
+        //             .create_change(
+        //                 CreateChangeInputBuilder::default()
+        //                     .owner_id(task.owner_id)
+        //                     .resource_id(task.id)
+        //                     .operation(ChangeOperation::Delete)
+        //                     .resource_type(ChangeResourceType::Task)
+        //                     .diff_json(
+        //                         serde_json::to_string(&json!({
+        //                             "result": task,
+        //                         }))
+        //                         .unwrap(),
+        //                     )
+        //                     .build()
+        //                     .unwrap(),
+        //             )
+        //             .await
+        //             .unwrap();
+
+        //         println!("change registered: {} | {}", change.operation, change.resource_type);
+        //     });
+        // }
 
         Ok(task)
     }

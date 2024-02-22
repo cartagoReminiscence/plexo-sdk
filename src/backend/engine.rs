@@ -10,9 +10,7 @@ pub struct SDKConfig {
     pub database_url: String,
     pub llm_api_key: String,
     pub llm_model_name: String,
-
-    pub admin_default_email: String,
-    pub admin_default_password: String,
+    // pub with_changes_registration: bool,
 }
 
 impl SDKConfig {
@@ -20,15 +18,16 @@ impl SDKConfig {
         let database_url = var("DATABASE_URL").unwrap();
         let llm_api_key = var("OPENAI_API_KEY").unwrap();
         let llm_model_name = var("OPENAI_MODEL_NAME").unwrap_or("gpt-3.5-turbo".to_string());
-        let admin_default_email = var("ADMIN_DEFAULT_EMAIL").unwrap_or("admin@plexo.app".to_string());
-        let admin_default_password = var("ADMIN_DEFAULT_PASSWORD").unwrap_or("admin".to_string());
+        // let with_changes_registration = var("WITH_CHANGES_REGISTRATION")
+        //     .unwrap_or("true".to_string())
+        //     .parse::<bool>()
+        //     .unwrap();
 
         SDKConfig {
             database_url,
             llm_api_key,
             llm_model_name,
-            admin_default_email,
-            admin_default_password,
+            // with_changes_registration,
         }
     }
 }
@@ -38,7 +37,6 @@ pub struct SDKEngine {
     pub config: SDKConfig,
     pub db_pool: Box<Pool<Postgres>>,
     pub llm_client: Box<Client<OpenAIConfig>>,
-    // pub llm_model_name: String,
 }
 
 impl SDKEngine {
@@ -58,7 +56,6 @@ impl SDKEngine {
             config,
             db_pool,
             llm_client,
-            // llm_model_name,
         })
     }
 

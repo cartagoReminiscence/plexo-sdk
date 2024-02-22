@@ -382,6 +382,8 @@ impl TeamCrudOperations for SDKEngine {
             prefix: team_final_info.prefix,
         };
 
+        tx.commit().await?;
+
         Ok(team)
     }
 

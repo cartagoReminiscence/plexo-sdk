@@ -33,7 +33,7 @@ where
     IsNotNull(T),
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Default, Builder, Object, InputObject, Serialize, Clone)]
 #[builder(pattern = "owned")]
 pub struct UpdateListInput {
     pub add: Vec<Uuid>,

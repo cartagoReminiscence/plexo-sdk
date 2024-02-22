@@ -9,7 +9,7 @@ use strum_macros::{Display, EnumString};
 
 use poem_openapi::Enum as OpenApiEnum;
 use serde::{Deserialize, Serialize};
-#[derive(Debug, SimpleObject, Object, Clone)]
+#[derive(Debug, SimpleObject, Object, Clone, Serialize)]
 #[graphql(name = "SDKProject")]
 pub struct Project {
     pub id: Uuid,

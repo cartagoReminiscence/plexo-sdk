@@ -301,12 +301,24 @@ impl ProjectCrudOperations for SDKEngine {
             UPDATE projects
             SET
                 name = COALESCE($1, name),
-                description = COALESCE($2, description)
-            WHERE id = $3
+                description = COALESCE($2, description),
+                prefix = COALESCE($3, prefix),
+                lead_id = COALESCE($4, lead_id),
+                start_date = COALESCE($5, start_date),
+                due_date = COALESCE($6, due_date),
+                status = COALESCE($7, status),
+                visibility = COALESCE($8, visibility)
+            WHERE id = $9
             RETURNING *
             "#,
             input.name,
             input.description,
+            input.prefix,
+            input.lead_id,
+            input.start_date,
+            input.due_date,
+            input.status.map(|a| a.to_string()),
+            input.visibility.map(|a| a.to_string()),
             id,
         )
         .fetch_one(&mut *tx)
@@ -371,6 +383,8 @@ impl ProjectCrudOperations for SDKEngine {
                 .unwrap();
             }
         }
+
+        tx.commit().await?;
 
         Ok(Project {
             id: project_final_info.id,

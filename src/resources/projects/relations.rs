@@ -20,7 +20,7 @@ use super::project::Project;
 #[async_trait]
 pub trait ProjectRelations {
     async fn owner(&self, loaders: &SDKLoaders) -> Result<Member, SDKError>;
-    async fn lead(&self, loaders: &SDKLoaders) -> Result<Member, SDKError>;
+    async fn lead(&self, loaders: &SDKLoaders) -> Result<Option<Member>, SDKError>;
 
     async fn tasks(&self, loaders: &SDKLoaders) -> Result<Vec<Task>, SDKError>;
     async fn members(&self, loaders: &SDKLoaders) -> Result<Vec<Member>, SDKError>;
@@ -38,14 +38,14 @@ impl ProjectRelations for Project {
         Ok(data)
     }
 
-    async fn lead(&self, loaders: &SDKLoaders) -> Result<Member, SDKError> {
+    async fn lead(&self, loaders: &SDKLoaders) -> Result<Option<Member>, SDKError> {
         let Some(lead_id) = self.lead_id else {
-            return Err(SDKError::ResourceNotFound);
+            return Ok(None);
         };
 
         let data = loaders.member_loader.load_one(lead_id).await.unwrap().unwrap();
 
-        Ok(data)
+        Ok(Some(data))
     }
 
     async fn tasks(&self, loaders: &SDKLoaders) -> Result<Vec<Task>, SDKError> {

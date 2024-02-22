@@ -1,5 +1,6 @@
 use std::{error::Error, str::FromStr, sync::Arc};
 
+use chrono::Local;
 use dotenv::dotenv;
 
 use plexo_sdk::{
@@ -12,7 +13,12 @@ use plexo_sdk::{
             operations::{GetProjectsInputBuilder, GetProjectsWhereBuilder, ProjectCrudOperations},
             relations::ProjectRelations,
         },
-        tasks::{operations::TaskCrudOperations, relations::TaskRelations},
+        tasks::{
+            extensions::{CreateTasksInputBuilder, TasksExtensionOperations},
+            operations::{CreateTaskInputBuilder, TaskCrudOperations},
+            relations::TaskRelations,
+            task::TaskStatus,
+        },
     },
 };
 
@@ -60,36 +66,39 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     println!("task owner: {:?}", task_owner.name);
 
-    // let tasks = engine
-    //     .create_tasks(
-    //         CreateTasksInputBuilder::default()
-    //             .tasks(vec![
-    //                 CreateTaskInputBuilder::default()
-    //                     .title("task foo".to_string())
-    //                     .owner_id(task_owner.id)
-    //                     .subtasks(vec![
-    //                         CreateTaskInputBuilder::default()
-    //                             .title("task foo 1".to_string())
-    //                             .owner_id(task_owner.id)
-    //                             .build()?,
-    //                         CreateTaskInputBuilder::default()
-    //                             .title("task foo 2".to_string())
-    //                             .owner_id(task_owner.id)
-    //                             .build()?,
-    //                     ])
-    //                     .build()?,
-    //                 CreateTaskInputBuilder::default()
-    //                     .title("task bar".to_string())
-    //                     .status(TaskStatus::Done)
-    //                     .due_date(Local::now().into())
-    //                     .owner_id(task_owner.id)
-    //                     .build()?,
-    //             ])
-    //             .build()?,
-    //     )
-    //     .await?;
+    let tasks = engine
+        .create_tasks(
+            CreateTasksInputBuilder::default()
+                .tasks(vec![
+                    CreateTaskInputBuilder::default()
+                        .title("Example Task".to_string())
+                        .owner_id(task_owner.id)
+                        .subtasks(vec![
+                            CreateTaskInputBuilder::default()
+                                .title("Example Task 1".to_string())
+                                .owner_id(task_owner.id)
+                                .build()?,
+                            CreateTaskInputBuilder::default()
+                                .title("Example Task 2".to_string())
+                                .owner_id(task_owner.id)
+                                .build()?,
+                        ])
+                        .build()?,
+                    CreateTaskInputBuilder::default()
+                        .title("Real Task".to_string())
+                        .status(TaskStatus::Done)
+                        .due_date(Local::now().into())
+                        .owner_id(task_owner.id)
+                        .build()?,
+                ])
+                .build()?,
+        )
+        .await
+        .unwrap();
 
-    // println!("\ncreated tasks: {:?}", tasks);
+    println!("\ncreated tasks: {:?}", tasks);
+
+    // tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
 
     Ok(())
 }

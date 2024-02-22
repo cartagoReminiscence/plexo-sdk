@@ -7,7 +7,7 @@ use strum_macros::Display;
 use strum_macros::EnumString;
 use uuid::Uuid;
 
-#[derive(Debug, SimpleObject, Object, Clone)]
+#[derive(Debug, SimpleObject, Object, Clone, Serialize)]
 #[graphql(name = "SDKMember")]
 pub struct Member {
     pub id: Uuid,
