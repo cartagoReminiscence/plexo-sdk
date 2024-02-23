@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            UPDATE tasks\n            SET\n                status = COALESCE($1, status),\n                priority = COALESCE($2, priority),\n                title = COALESCE($3, title),\n                description = COALESCE($4, description),\n                due_date = COALESCE($5, due_date),\n                project_id = COALESCE($6, project_id),\n                lead_id = COALESCE($7, lead_id),\n                parent_id = COALESCE($8, parent_id)\n            WHERE id = $9\n            RETURNING *\n            ",
+  "query": "\n            UPDATE tasks\n            SET\n                status = COALESCE($1, status),\n                priority = COALESCE($2, priority),\n                title = COALESCE($3, title),\n                description = COALESCE($4, description),\n                due_date = COALESCE($5, due_date),\n                project_id = NULLIF(COALESCE($6, project_id), '00000000-0000-0000-0000-000000000000'),\n                lead_id = NULLIF(COALESCE($7, lead_id), '00000000-0000-0000-0000-000000000000'),\n                parent_id = NULLIF(COALESCE($8, parent_id), '00000000-0000-0000-0000-000000000000')\n            WHERE id = $9\n            RETURNING *\n            ",
   "describe": {
     "columns": [
       {
@@ -104,5 +104,5 @@
       true
     ]
   },
-  "hash": "ce4fad2dd9dbe99e93df5a26a419a50c1741e05cd8efec0c7a739f6047c4b0a9"
+  "hash": "431626ccf31cd7accfe5996dea36af575587d3aab50c98c125f420eaff3b591e"
 }

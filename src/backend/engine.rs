@@ -1,4 +1,4 @@
-use std::env::var;
+use std::{env::var, time::Duration};
 
 use async_openai::{config::OpenAIConfig, Client};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
@@ -42,7 +42,8 @@ pub struct SDKEngine {
 impl SDKEngine {
     pub async fn new(config: SDKConfig) -> Result<SDKEngine, SDKError> {
         let pool = PgPoolOptions::new()
-            .max_connections(3)
+            .max_connections(10)
+            .acquire_timeout(Duration::from_secs(60))
             .connect(config.database_url.as_str())
             .await?;
 

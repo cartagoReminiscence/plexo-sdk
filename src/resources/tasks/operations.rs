@@ -381,8 +381,6 @@ impl TaskCrudOperations for SDKEngine {
     async fn update_task(&self, id: Uuid, input: UpdateTaskInput) -> Result<Task, SDKError> {
         let mut tx = self.db_pool.begin().await?;
 
-        // let saved_input = input.clone();
-
         let task_final_info = sqlx::query!(
             r#"
             UPDATE tasks
@@ -392,9 +390,9 @@ impl TaskCrudOperations for SDKEngine {
                 title = COALESCE($3, title),
                 description = COALESCE($4, description),
                 due_date = COALESCE($5, due_date),
-                project_id = COALESCE($6, project_id),
-                lead_id = COALESCE($7, lead_id),
-                parent_id = COALESCE($8, parent_id)
+                project_id = NULLIF(COALESCE($6, project_id), '00000000-0000-0000-0000-000000000000'),
+                lead_id = NULLIF(COALESCE($7, lead_id), '00000000-0000-0000-0000-000000000000'),
+                parent_id = NULLIF(COALESCE($8, parent_id), '00000000-0000-0000-0000-000000000000')
             WHERE id = $9
             RETURNING *
             "#,
