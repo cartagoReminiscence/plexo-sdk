@@ -270,7 +270,7 @@ BEGIN
 END;
 $$;
 
-alter function set_current_timestamp_updated_at() owner to bregydoc;
+ALTER FUNCTION set_current_timestamp_updated_at() OWNER TO CURRENT_USER;
 
 create trigger set_public_labels_updated_at
     before update
