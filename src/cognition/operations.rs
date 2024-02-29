@@ -136,3 +136,51 @@ impl CognitionOperations for SDKEngine {
         Ok(subtasks)
     }
 }
+
+// impl CognitionOperations for SDKEngine {
+//     async fn get_suggestions(&self, input: TaskSuggestionInput) -> Result<TaskSuggestion, SDKError> {
+//         let tasks_fingerprints = self.acquire_tasks_fingerprints(10, input.project_id).await;
+
+//         let system_message =
+//             "Based on the task information provided by the user, predict the next task including title, description, status, priority, and due date. Ensure the response is in valid JSON format matching the TaskSuggestion structure. Use TaskStatus values: None, Backlog, ToDo, InProgress, Done, Canceled; and TaskPriority values: None, Low, Medium, High, Urgent."
+//             .to_string();
+
+//         let user_message = format!(
+//             "Given the current time: {}
+//             and the context of current tasks: {}
+//             Generate a task suggestion based on the user input below, ensuring all fields are filled appropriately in JSON format.",
+//             Local::now(),
+//             tasks_fingerprints.join("\n\n"),
+//         );
+
+//         let result = self.chat_completion(system_message, user_message).await;
+//         let result = result.trim().trim_matches('`');
+
+//         let suggestion_result: TaskSuggestion = serde_json::from_str(result)?;
+
+//         Ok(suggestion_result)
+//     }
+
+//     async fn subdivide_task(&self, input: SubdivideTaskInput) -> Result<Vec<TaskSuggestion>, SDKError> {
+//         let task = self.get_task(input.task_id).await?;
+
+//         let system_message = "Given a single task, generate a list of subtasks in a valid JSON format, including details such as title, description, status, priority, and due date. Use specific values for TaskStatus and TaskPriority as mentioned previously."
+//         .to_string();
+
+//         let user_message = format!(
+//             "Considering the current time: {}
+//             and the details of the parent task: {}
+//             Generate {} subtasks in JSON format, adhering to the specified structure for each subtask.",
+//             Local::now(),
+//             Self::calculate_task_fingerprint(task),
+//             input.subtasks,
+//         );
+
+//         let result = self.chat_completion(system_message, user_message).await;
+//         let result = result.trim().trim_matches('`');
+
+//         let subtasks: Vec<TaskSuggestion> = serde_json::from_str(result)?;
+
+//         Ok(subtasks)
+//     }
+// }

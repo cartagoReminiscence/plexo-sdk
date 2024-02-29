@@ -2,6 +2,7 @@ use std::{env::var, time::Duration};
 
 use async_openai::{config::OpenAIConfig, Client};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+// use tokio::runtime::Handle;
 
 use crate::errors::sdk::SDKError;
 
@@ -37,6 +38,7 @@ pub struct SDKEngine {
     pub config: SDKConfig,
     pub db_pool: Box<Pool<Postgres>>,
     pub llm_client: Box<Client<OpenAIConfig>>,
+    // tasks: Arc<tokio::task::>,
 }
 
 impl SDKEngine {
@@ -62,6 +64,12 @@ impl SDKEngine {
 
     pub async fn migrate(&self) -> Result<(), SDKError> {
         sqlx::migrate!().run(self.db_pool.as_ref()).await?;
+
+        Ok(())
+    }
+
+    pub async fn wait_all_tasks(&self) -> Result<(), SDKError> {
+        // let handle = Handle::current();
 
         Ok(())
     }
