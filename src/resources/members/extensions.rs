@@ -31,7 +31,8 @@ pub struct CreateMemberFromEmailInput {
     email: String,
     name: String,
     password_hash: String,
-
+    #[builder(setter(strip_option), default)]
+    role: Option<MemberRole>,
     #[builder(setter(strip_option), default)]
     photo_url: Option<String>,
 }
@@ -73,14 +74,15 @@ impl MembersExtensionOperations for SDKEngine {
     async fn create_member_from_email(&self, input: CreateMemberFromEmailInput) -> Result<Member, SDKError> {
         let member_info = sqlx::query!(
             "
-            INSERT INTO members (email, name, password_hash, photo_url)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO members (email, name, password_hash, photo_url, role)
+            VALUES ($1, $2, $3, $4, COALESCE($5))
             RETURNING *
             ",
             input.email,
             input.name,
             input.password_hash,
             input.photo_url,
+            input.role.map(|role| role.to_string()),
         )
         .fetch_one(&*self.db_pool)
         .await?;
