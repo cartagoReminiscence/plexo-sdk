@@ -139,22 +139,26 @@ impl MembersExtensionOperations for SDKEngine {
             email,
         )
         .fetch_one(&*self.db_pool)
-        .await?;
+        .await;
 
-        Ok(Some(Member {
-            id: member_info.id,
-            email: member_info.email,
-            name: member_info.name,
-            created_at: member_info.created_at,
-            updated_at: member_info.updated_at,
-            github_id: member_info.github_id,
-            google_id: member_info.google_id,
-            photo_url: member_info.photo_url,
-            role: member_info
-                .role
-                .and_then(|a| MemberRole::from_str(&a).ok())
-                .unwrap_or_default(),
-            password_hash: member_info.password_hash,
-        }))
+        match member_info {
+            Err(sqlx::Error::RowNotFound) => Ok(None),
+            Err(e) => Err(SDKError::from(e)),
+            Ok(member_info) => Ok(Some(Member {
+                id: member_info.id,
+                email: member_info.email,
+                name: member_info.name,
+                created_at: member_info.created_at,
+                updated_at: member_info.updated_at,
+                github_id: member_info.github_id,
+                google_id: member_info.google_id,
+                photo_url: member_info.photo_url,
+                role: member_info
+                    .role
+                    .and_then(|a| MemberRole::from_str(&a).ok())
+                    .unwrap_or_default(),
+                password_hash: member_info.password_hash,
+            })),
+        }
     }
 }
