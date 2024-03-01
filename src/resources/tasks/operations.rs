@@ -157,7 +157,7 @@ impl GetTasksWhere {
         }
 
         if let Some(owner_id) = &self.owner_id {
-            conditions.push(format!("owner_id = {}", owner_id));
+            conditions.push(format!("owner_id = '{}'", owner_id));
         }
 
         if let Some(status) = &self.status {
@@ -181,15 +181,15 @@ impl GetTasksWhere {
         }
 
         if let Some(project_id) = &self.project_id {
-            conditions.push(format!("project_id = {}", project_id));
+            conditions.push(format!("project_id = '{}'", project_id));
         }
 
         if let Some(lead_id) = &self.lead_id {
-            conditions.push(format!("lead_id = {}", lead_id));
+            conditions.push(format!("lead_id = '{}'", lead_id));
         }
 
         if let Some(parent_id) = &self.parent_id {
-            conditions.push(format!("parent_id = {}", parent_id));
+            conditions.push(format!("parent_id = '{}'", parent_id));
         }
 
         if let Some(ands) = &self._and {

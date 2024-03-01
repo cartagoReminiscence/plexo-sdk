@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Local, Utc};
 use derive_builder::Builder;
 use poem_openapi::Object;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
@@ -17,7 +17,7 @@ use crate::{
 
 use super::suggestions::CognitionCapabilities;
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct TaskSuggestionInput {
     #[builder(setter(strip_option), default)]
@@ -50,6 +50,9 @@ pub struct TaskSuggestion {
 pub struct SubdivideTaskInput {
     pub task_id: Uuid,
     pub subtasks: u8, // TODO: validate it or die
+
+    #[builder(setter(strip_option), default)]
+    pub with_tasks_context: Option<bool>,
 }
 
 #[async_trait]

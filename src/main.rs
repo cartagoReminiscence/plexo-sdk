@@ -1,28 +1,19 @@
-use std::{error::Error, str::FromStr, sync::Arc};
+use std::{error::Error, sync::Arc};
 
-use chrono::Local;
 use dotenv::dotenv;
 
 use plexo_sdk::{
-    backend::{
-        engine::{SDKConfig, SDKEngine},
-        loaders::SDKLoaders,
+    backend::engine::{SDKConfig, SDKEngine},
+    cognition::{
+        operations::{SubdivideTaskInputBuilder, TaskSuggestionInputBuilder},
+        v2::operations::CognitionOperationsV2,
     },
+    common::commons::SortOrder,
     resources::{
-        projects::{
-            operations::{GetProjectsInputBuilder, GetProjectsWhereBuilder, ProjectCrudOperations},
-            relations::ProjectRelations,
-        },
-        tasks::{
-            extensions::{CreateTasksInputBuilder, TasksExtensionOperations},
-            operations::{CreateTaskInputBuilder, TaskCrudOperations},
-            relations::TaskRelations,
-            task::TaskStatus,
-        },
+        projects::operations::{GetProjectsInputBuilder, ProjectCrudOperations},
+        tasks::operations::{GetTasksInputBuilder, TaskCrudOperations},
     },
 };
-
-use uuid::Uuid;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -31,74 +22,46 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let engine = SDKEngine::new(SDKConfig::from_env()).await?;
     let engine = Arc::new(engine);
 
-    let loaders = SDKLoaders::new(engine.clone());
+    let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
+    let project = projects.first().unwrap().to_owned();
 
-    let projects = engine
-        .get_projects(
-            GetProjectsInputBuilder::default()
-                .filter(
-                    GetProjectsWhereBuilder::default()
-                        .ids(vec![
-                            Uuid::from_str("21c87de9-5ae5-4fca-ad41-ed8bc02c7955")?,
-                            Uuid::from_str("69e9b0ee-603a-407b-8a2d-99033de6ae86")?,
-                            Uuid::from_str("0d6b949f-b64a-4aca-a6f6-b79fc8e6228e")?,
-                        ])
-                        .name("Plexo".to_string())
-                        .build()?,
-                )
-                .limit(1_000_000)
+    let task = engine
+        .get_tasks(
+            GetTasksInputBuilder::default()
+                .sort_by("created_at".to_string())
+                .sort_order(SortOrder::Asc)
+                .limit(1)
+                .build()
+                .ok(),
+        )
+        .await?
+        .first()
+        .unwrap()
+        .to_owned();
+
+    // let user_query = "...".to_string();
+
+    let suggested_task = engine
+        .get_suggestions_v2(
+            TaskSuggestionInputBuilder::default()
+                .project_id(project.id)
+                .title("next big update".to_string())
                 .build()?,
         )
         .await?;
 
-    println!("projects: {:?}", projects);
+    println!("suggestion: {:?}", suggested_task);
 
-    let project = projects.first().unwrap();
-
-    let project_owner = project.owner(&loaders).await?;
-
-    println!("project owner: {:?}", project_owner.name);
-
-    let tasks = engine.get_tasks(None).await?;
-    let task = tasks.first().unwrap();
-
-    let task_owner = task.owner(&loaders).await?;
-
-    println!("task owner: {:?}", task_owner.name);
-
-    let tasks = engine
-        .create_tasks(
-            CreateTasksInputBuilder::default()
-                .tasks(vec![
-                    CreateTaskInputBuilder::default()
-                        .title("Example Task".to_string())
-                        .owner_id(task_owner.id)
-                        .subtasks(vec![
-                            CreateTaskInputBuilder::default()
-                                .title("Example Task 1".to_string())
-                                .owner_id(task_owner.id)
-                                .build()?,
-                            CreateTaskInputBuilder::default()
-                                .title("Example Task 2".to_string())
-                                .owner_id(task_owner.id)
-                                .build()?,
-                        ])
-                        .build()?,
-                    CreateTaskInputBuilder::default()
-                        .title("Real Task".to_string())
-                        .status(TaskStatus::Done)
-                        .due_date(Local::now().into())
-                        .owner_id(task_owner.id)
-                        .build()?,
-                ])
+    let subdivided_tasks = engine
+        .subdivide_task_v2(
+            SubdivideTaskInputBuilder::default()
+                .task_id(task.id)
+                .subtasks(3)
                 .build()?,
         )
-        .await
-        .unwrap();
+        .await?;
 
-    println!("\ncreated tasks: {:?}", tasks);
-
-    // tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+    println!("subdivided tasks: {:?}", subdivided_tasks);
 
     Ok(())
 }
