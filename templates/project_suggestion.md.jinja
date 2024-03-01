@@ -1,0 +1,49 @@
+The user pass to you a basic explanation of the project that wants to develop, and, optionally, a list of tasks that he/she wants to do.
+Based on the information that the user pass to you, you need to return project suggestion.
+Ensure the response is in valid JSON format matching the TaskSuggestion structure. Use ProjectStatus values: None, Backlog, ToDo, InProgress, Done, Canceled; and ProjectVisibility values: None, Private, Internal, Public.
+
+Please return only a valid json with the following struct: 
+
+struct ProjectSuggestion {
+    pub name: String,
+    pub status: ProjectStatus,
+    pub visibility: ProjectVisibility,
+
+    pub prefix: String,
+    pub description: String,
+}
+
+Don't include any prefix or suffix in your response, only return a parseable json string.
+Don't add "\n"
+
+Current Time:
+
+{{ self::current_time() }}
+
+Information About the current Projects in the system:
+
+{% for project in projects %}
+    {{- self::calculate_project_fingerprint(project)|safe }}
+
+{% endfor %}
+
+Current Project Description:
+{{ description }}
+
+
+{% match initial_state %}
+{% when Some with (initial_state)%}
+Initial Proposal from user:
+
+{{self::calculate_project_suggestion_input_fingerprint(initial_state)|safe}}
+{% when None %}
+{% endmatch %}
+
+
+{% match user_query %}
+{% when Some with (user_query)%}
+The user extra input is:
+{{user_query}}
+{% when None %}
+{% endmatch %}
+

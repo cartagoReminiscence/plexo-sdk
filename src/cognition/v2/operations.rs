@@ -10,7 +10,10 @@ use crate::{
     common::commons::SortOrder,
     errors::sdk::SDKError,
     resources::{
-        projects::{operations::ProjectCrudOperations, project::Project},
+        projects::{
+            operations::{GetProjectsInputBuilder, ProjectCrudOperations},
+            project::Project,
+        },
         tasks::{
             operations::{GetTasksInputBuilder, GetTasksWhereBuilder, TaskCrudOperations},
             task::Task,
@@ -18,10 +21,13 @@ use crate::{
     },
 };
 
+use super::projects::{ProjectSuggestion, ProjectSuggestionInput};
+
 #[async_trait]
 pub trait CognitionOperationsV2 {
     async fn get_suggestions_v2(&self, input: TaskSuggestionInput) -> Result<TaskSuggestion, SDKError>;
     async fn subdivide_task_v2(&self, input: SubdivideTaskInput) -> Result<Vec<TaskSuggestion>, SDKError>;
+    async fn get_project_suggestion(&self, input: ProjectSuggestionInput) -> Result<ProjectSuggestion, SDKError>;
 }
 
 fn calculate_task_fingerprint(task: &Task) -> String {
@@ -38,6 +44,10 @@ fn calculate_task_suggestion_input_fingerprint(input: &TaskSuggestionInput) -> S
 
 fn current_time() -> String {
     chrono::Local::now().to_string()
+}
+
+fn calculate_project_suggestion_input_fingerprint(input: &ProjectSuggestionInput) -> String {
+    serde_json::to_string_pretty(&input).unwrap()
 }
 
 #[derive(Template)]
@@ -62,6 +72,15 @@ pub struct TaskSubdivideTemplate {
 #[derive(Template)]
 #[template(path = "plexo_system.md.jinja", ext = "plain")]
 pub struct PlexoSystemTemplate {}
+
+#[derive(Template)]
+#[template(path = "project_suggestion.md.jinja", ext = "plain")]
+pub struct ProjectSuggestionTemplate {
+    description: String,
+    projects: Vec<Project>,
+    initial_state: Option<ProjectSuggestionInput>,
+    user_query: Option<String>,
+}
 
 #[async_trait]
 impl CognitionOperationsV2 for SDKEngine {
@@ -181,5 +200,40 @@ impl CognitionOperationsV2 for SDKEngine {
         })?;
 
         Ok(subtasks)
+    }
+
+    async fn get_project_suggestion(&self, input: ProjectSuggestionInput) -> Result<ProjectSuggestion, SDKError> {
+        let system_message = PlexoSystemTemplate {}.render().unwrap();
+
+        let projects = self
+            .get_projects(
+                GetProjectsInputBuilder::default()
+                    .limit(10)
+                    .sort_by("created_at".to_string())
+                    .sort_order(SortOrder::Asc)
+                    .build()
+                    .unwrap(),
+            )
+            .await?;
+
+        let description = input.description.clone();
+
+        let input_message = ProjectSuggestionTemplate {
+            description,
+            projects,
+            initial_state: Some(input),
+            user_query: None,
+        }
+        .render()
+        .unwrap();
+
+        let result = self.chat_completion(system_message, input_message).await;
+        let result = result.trim().trim_matches('`');
+
+        let suggestion_result: ProjectSuggestion = serde_json::from_str(result).inspect_err(|err| {
+            println!("Error parsing project suggestion result: {:?}", err);
+        })?;
+
+        Ok(suggestion_result)
     }
 }

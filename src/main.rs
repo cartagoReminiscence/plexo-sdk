@@ -6,7 +6,7 @@ use plexo_sdk::{
     backend::engine::{SDKConfig, SDKEngine},
     cognition::{
         operations::{SubdivideTaskInputBuilder, TaskSuggestionInputBuilder},
-        v2::operations::CognitionOperationsV2,
+        v2::{operations::CognitionOperationsV2, projects::ProjectSuggestionInputBuilder},
     },
     common::commons::SortOrder,
     resources::{
@@ -62,6 +62,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await?;
 
     println!("subdivided tasks: {:?}", subdivided_tasks);
+
+    let project_suggestion = engine
+        .get_project_suggestion(
+            ProjectSuggestionInputBuilder::default()
+                .description("A new project based on modern web".to_string())
+                .build()?,
+        )
+        .await?;
+
+    println!("project suggestion: {:?}", project_suggestion);
 
     Ok(())
 }
