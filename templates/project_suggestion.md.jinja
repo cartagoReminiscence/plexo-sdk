@@ -18,10 +18,8 @@ struct ProjectSuggestion {
     pub name: String,
     pub status: ProjectStatus,
     pub visibility: ProjectVisibility,
-
     pub prefix: String,
     pub description: String,
-
     pub tasks: Option<Vec<TaskSuggestion>>,
 }
 
@@ -29,6 +27,7 @@ Don't include any prefix or suffix in your response, only return a valid json st
 Don't add "\n"
 
 Remember use the correct fields in the struct, and the correct values for the enums.
+Always fill all the fields for ProjectSuggestion, don't forget 'prefix' and 'description' fields.
 
 Current Time:
 
