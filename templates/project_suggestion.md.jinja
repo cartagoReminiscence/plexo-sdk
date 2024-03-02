@@ -6,7 +6,7 @@ Use TaskStatus values: None, Backlog, ToDo, InProgress, Done, Canceled; and Task
 
 Please return only a valid json with the following struct: 
 
-pub struct TaskSuggestion {
+struct TaskSuggestion {
     pub title: String,
     pub description: String,
     pub status: TaskStatus,
@@ -25,7 +25,7 @@ struct ProjectSuggestion {
     pub tasks: Option<Vec<TaskSuggestion>>,
 }
 
-Don't include any prefix or suffix in your response, only return a parseable json string (don't include "json" tag at the start).
+Don't include any prefix or suffix in your response, only return a valid json string (don't include "json" tag at the start).
 Don't add "\n"
 
 Remember use the correct fields in the struct, and the correct values for the enums.
