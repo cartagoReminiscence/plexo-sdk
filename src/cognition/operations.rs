@@ -35,7 +35,7 @@ pub struct TaskSuggestionInput {
     pub due_date: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Clone, Default, Builder, Object, SimpleObject, Deserialize, InputObject, Serialize)]
+#[derive(Debug, Clone, Default, Builder, Object, SimpleObject, Deserialize)]
 #[builder(pattern = "owned")]
 pub struct TaskSuggestion {
     pub title: String,

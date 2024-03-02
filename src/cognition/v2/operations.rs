@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-use super::projects::{ProjectSuggestion, ProjectSuggestionInput};
+use super::projects::{ProjectSuggestion, ProjectSuggestionInput, ProjectTaskSuggestionInput};
 
 #[async_trait]
 pub trait CognitionOperationsV2 {
@@ -50,7 +50,7 @@ fn calculate_project_suggestion_input_fingerprint(input: &ProjectSuggestionInput
     serde_json::to_string_pretty(&input).unwrap()
 }
 
-fn calculate_task_suggestion_fingerprint(input: &TaskSuggestion) -> String {
+fn calculate_task_suggestion_fingerprint(input: &ProjectTaskSuggestionInput) -> String {
     serde_json::to_string_pretty(&input).unwrap()
 }
 
@@ -84,7 +84,7 @@ pub struct ProjectSuggestionTemplate {
     generate_tasks_number: u8,
     projects: Vec<Project>,
     initial_state: Option<ProjectSuggestionInput>,
-    initial_tasks: Option<Vec<TaskSuggestion>>,
+    initial_tasks: Option<Vec<ProjectTaskSuggestionInput>>,
     user_query: Option<String>,
 }
 
