@@ -67,6 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .get_project_suggestion(
             ProjectSuggestionInputBuilder::default()
                 .description("A new project based on modern web".to_string())
+                .generate_tasks_number(3)
                 .build()?,
         )
         .await?;

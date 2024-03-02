@@ -1,5 +1,7 @@
 The user pass to you a list of tasks and you should predict the following based on the input of the user.
-Based on the task information provided by the user, predict the next task including title, description, status, priority, and due date. Ensure the response is in valid JSON format matching the TaskSuggestion structure. Use TaskStatus values: None, Backlog, ToDo, InProgress, Done, Canceled; and TaskPriority values: None, Low, Medium, High, Urgent.
+Based on the task information provided by the user, predict the next task including title, description, status, priority, and due date. 
+Ensure the response is in valid JSON format matching the TaskSuggestion structure. 
+Use TaskStatus values: None, Backlog, ToDo, InProgress, Done, Canceled; and TaskPriority values: None, Low, Medium, High, Urgent.
 
 Please return only a valid json with the following struct: 
 
@@ -11,7 +13,7 @@ struct TaskSuggestion {
     due_date: DateTime<Utc>
 }
 
-Don't include any prefix or suffix in your response, only return a parseable json string.
+Don't include any prefix or suffix in your response, only return a parseable json string (don't include "json" tag at the start).
 Don't add "\n"
 
 Current Time:

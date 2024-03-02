@@ -1,8 +1,18 @@
 The user pass to you a basic explanation of the project that wants to develop, and, optionally, a list of tasks that he/she wants to do.
 Based on the information that the user pass to you, you need to return project suggestion.
-Ensure the response is in valid JSON format matching the TaskSuggestion structure. Use ProjectStatus values: None, Backlog, ToDo, InProgress, Done, Canceled; and ProjectVisibility values: None, Private, Internal, Public.
+Ensure the response is in valid JSON format matching the TaskSuggestion structure. 
+Use ProjectStatus values: None, Backlog, ToDo, InProgress, Done, Canceled; and ProjectVisibility values: None, Private, Internal, Public.
+Use TaskStatus values: None, Backlog, ToDo, InProgress, Done, Canceled; and TaskPriority values: None, Low, Medium, High, Urgent.
 
 Please return only a valid json with the following struct: 
+
+pub struct TaskSuggestion {
+    pub title: String,
+    pub description: String,
+    pub status: TaskStatus,
+    pub priority: TaskPriority,
+    pub due_date: DateTime<Utc>,
+}
 
 struct ProjectSuggestion {
     pub name: String,
@@ -11,10 +21,14 @@ struct ProjectSuggestion {
 
     pub prefix: String,
     pub description: String,
+
+    pub tasks: Option<Vec<TaskSuggestion>>,
 }
 
-Don't include any prefix or suffix in your response, only return a parseable json string.
+Don't include any prefix or suffix in your response, only return a parseable json string (don't include "json" tag at the start).
 Don't add "\n"
+
+Remember use the correct fields in the struct, and the correct values for the enums.
 
 Current Time:
 
@@ -39,6 +53,22 @@ Initial Proposal from user:
 {% when None %}
 {% endmatch %}
 
+{% match initial_tasks %}
+{% when Some with (initial_tasks)%}
+
+The user define the following initial tasks:
+{% for task in initial_tasks %}
+    {{- self::calculate_task_suggestion_fingerprint(task)|safe }}
+{% endfor %}
+
+{% when None %}
+{% endmatch %}
+
+{% match generate_tasks_number %}
+{% when (generate_tasks_number)%}
+The user wants to generate {{generate_tasks_number}} tasks
+{% when 0 %}
+{% endmatch %}
 
 {% match user_query %}
 {% when Some with (user_query)%}

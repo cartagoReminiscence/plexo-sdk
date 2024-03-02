@@ -50,6 +50,10 @@ fn calculate_project_suggestion_input_fingerprint(input: &ProjectSuggestionInput
     serde_json::to_string_pretty(&input).unwrap()
 }
 
+fn calculate_task_suggestion_fingerprint(input: &TaskSuggestion) -> String {
+    serde_json::to_string_pretty(&input).unwrap()
+}
+
 #[derive(Template)]
 #[template(path = "task_suggestion.md.jinja", ext = "plain")]
 pub struct TaskSuggestionTemplate {
@@ -77,8 +81,10 @@ pub struct PlexoSystemTemplate {}
 #[template(path = "project_suggestion.md.jinja", ext = "plain")]
 pub struct ProjectSuggestionTemplate {
     description: String,
+    generate_tasks_number: u8,
     projects: Vec<Project>,
     initial_state: Option<ProjectSuggestionInput>,
+    initial_tasks: Option<Vec<TaskSuggestion>>,
     user_query: Option<String>,
 }
 
@@ -134,6 +140,7 @@ impl CognitionOperationsV2 for SDKEngine {
 
         let suggestion_result: TaskSuggestion = serde_json::from_str(result).inspect_err(|err| {
             println!("Error parsing suggestion result: {:?}", err);
+            println!("raw result: {:?}", result);
         })?;
 
         Ok(suggestion_result)
@@ -197,6 +204,7 @@ impl CognitionOperationsV2 for SDKEngine {
 
         let subtasks: Vec<TaskSuggestion> = serde_json::from_str(result).inspect_err(|err| {
             println!("Error parsing subtasks result: {:?}", err);
+            println!("raw result: {:?}", result);
         })?;
 
         Ok(subtasks)
@@ -217,10 +225,14 @@ impl CognitionOperationsV2 for SDKEngine {
             .await?;
 
         let description = input.description.clone();
+        let generate_tasks_number = input.generate_tasks_number.unwrap_or(0);
+        let initial_tasks = input.initial_tasks.clone();
 
         let input_message = ProjectSuggestionTemplate {
             description,
             projects,
+            generate_tasks_number,
+            initial_tasks,
             initial_state: Some(input),
             user_query: None,
         }
@@ -232,6 +244,7 @@ impl CognitionOperationsV2 for SDKEngine {
 
         let suggestion_result: ProjectSuggestion = serde_json::from_str(result).inspect_err(|err| {
             println!("Error parsing project suggestion result: {:?}", err);
+            println!("raw result: {:?}", result);
         })?;
 
         Ok(suggestion_result)
