@@ -6,6 +6,8 @@ use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 
 use crate::errors::sdk::SDKError;
 
+const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
+
 #[derive(Clone)]
 pub struct SDKConfig {
     pub database_url: String,
@@ -68,9 +70,10 @@ impl SDKEngine {
         Ok(())
     }
 
-    pub async fn wait_all_tasks(&self) -> Result<(), SDKError> {
-        // let handle = Handle::current();
-
-        Ok(())
+    pub fn version(&self) -> Result<String, SDKError> {
+        match VERSION {
+            Some(version) => Ok(version.to_string()),
+            None => Err(SDKError::VersionNotFound),
+        }
     }
 }

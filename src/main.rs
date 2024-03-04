@@ -22,6 +22,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let engine = SDKEngine::new(SDKConfig::from_env()).await?;
     let engine = Arc::new(engine);
 
+    println!("version: {:?}", engine.version()?);
+
     let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
     let project = projects.first().unwrap().to_owned();
 
