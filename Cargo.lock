@@ -1945,7 +1945,7 @@ checksum = "26072860ba924cbfa98ea39c8c19b4dd6a4a25423dbdf219c1eca91aa0cf6964"
 
 [[package]]
 name = "plexo-sdk"
-version = "0.4.12"
+version = "0.4.13"
 dependencies = [
  "askama",
  "async-graphql",
