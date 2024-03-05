@@ -29,12 +29,12 @@ async-graphql = { version = "7.0.2", features = [
     "dataloader",
     "uuid",
 ] }
-poem-openapi = { version = "4.0.0", features = [
+poem-openapi = { version = "4.0.1", features = [
     "swagger-ui",
     "chrono",
     "uuid",
 ] }
 serde = "1.0.197"
-async-openai = "0.18.3"
+async-openai = "0.19.0"
 serde_json = "1.0.114"
 askama = "0.12.1"

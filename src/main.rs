@@ -22,6 +22,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let engine = SDKEngine::new(SDKConfig::from_env()).await?;
     let engine = Arc::new(engine);
 
+    engine.migrate().await?;
+
     println!("version: {:?}", engine.version()?);
 
     let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
@@ -40,8 +42,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .first()
         .unwrap()
         .to_owned();
-
-    // let user_query = "...".to_string();
 
     let suggested_task = engine
         .get_suggestions_v2(
