@@ -183,15 +183,19 @@ impl OrganizationCrudOperations for SDKEngine {
             name,
         )
         .fetch_one(self.db_pool.as_ref())
-        .await?;
+        .await;
 
-        Ok(Some(OrganizationSettings {
-            id: task_info.id,
-            created_at: task_info.created_at,
-            updated_at: task_info.updated_at,
-            owner_id: task_info.owner_id,
-            name: task_info.name,
-            value: task_info.value,
-        }))
+        match task_info {
+            Err(sqlx::Error::RowNotFound) => return Ok(None),
+            Err(err) => return Err(err.into()),
+            Ok(task_info) => Ok(Some(OrganizationSettings {
+                id: task_info.id,
+                created_at: task_info.created_at,
+                updated_at: task_info.updated_at,
+                owner_id: task_info.owner_id,
+                name: task_info.name,
+                value: task_info.value,
+            })),
+        }
     }
 }
