@@ -2,7 +2,24 @@ use std::{error::Error, sync::Arc};
 
 use dotenv::dotenv;
 
-use plexo_sdk::backend::engine::{SDKConfig, SDKEngine};
+use plexo_sdk::{
+    backend::{
+        engine::{SDKConfig, SDKEngine},
+        // loaders::SDKLoaders,
+    },
+    // cognition::{
+    // operations::{SubdivideTaskInputBuilder, TaskSuggestionInputBuilder},
+    // v2::{operations::CognitionOperationsV2, projects::ProjectSuggestionInputBuilder},
+    // },
+    // common::commons::SortOrder,
+    resources::{
+        projects::{
+            operations::{GetProjectsInputBuilder, ProjectCrudOperations},
+            // relations::ProjectRelations,
+        },
+        // tasks::operations::{GetTasksInputBuilder, TaskCrudOperations},
+    },
+};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -13,10 +30,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     engine.migrate().await?;
 
+    // let loaders = SDKLoaders::new(engine.clone());
+
     println!("version: {:?}", engine.version()?);
 
-    // let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
-    // let project = projects.first().unwrap().to_owned();
+    let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
+
+    println!("projects: {:?}", projects);
+
+    // let lead = project.lead(&loaders).await?;
 
     // let task = engine
     //     .get_tasks(
