@@ -46,7 +46,40 @@ pub struct Engine<State: EngineState> {
 }
 
 impl Engine<WithoutContext> {
-    pub async fn new(config: SDKConfig) -> Result<Engine<WithoutContext>, SDKError> {
+    pub async fn initialize_organization(
+        &self,
+        ctx: &EngineContext,
+        value: OrganizationInitializationInput,
+    ) -> Result<Organization, SDKError> {
+        let org_serialized = serde_json::to_string(&value)?;
+
+        let org = self
+            .set_organization_setting(
+                SetOrganizationInputBuilder::default()
+                    .owner_id(ctx.member_id)
+                    .name(GLOBAL_ORGANIZATION_SETTINGS_NAME.to_string())
+                    .value(org_serialized)
+                    .build()
+                    .unwrap(),
+            )
+            .await?;
+
+        Ok(org.into())
+    }
+}
+
+impl<AnyState> Engine<AnyState>
+where
+    AnyState: EngineState,
+{
+    pub async fn new_with_context(ctx: &EngineContext, config: SDKConfig) -> Result<Engine<WithContext>, SDKError> {
+        Engine::<WithoutContext>::new_without_context(config)
+            .await?
+            .with_context(ctx)
+            .await
+    }
+
+    pub async fn new_without_context(config: SDKConfig) -> Result<Engine<WithoutContext>, SDKError> {
         let pool = PgPoolOptions::new()
             .max_connections(10)
             .acquire_timeout(Duration::from_secs(60))
@@ -79,25 +112,16 @@ impl Engine<WithoutContext> {
             None => Err(SDKError::VersionNotFound),
         }
     }
+}
 
-    pub async fn initialize_organization(
-        &self,
-        ctx: &EngineContext,
-        value: OrganizationInitializationInput,
-    ) -> Result<Organization, SDKError> {
-        let org_serialized = serde_json::to_string(&value)?;
-
-        let org = self
-            .set_organization_setting(
-                SetOrganizationInputBuilder::default()
-                    .owner_id(ctx.member_id)
-                    .name(GLOBAL_ORGANIZATION_SETTINGS_NAME.to_string())
-                    .value(org_serialized)
-                    .build()
-                    .unwrap(),
-            )
-            .await?;
-
-        Ok(org.into())
+impl Engine<WithoutContext> {
+    pub async fn with_context(self, ctx: &EngineContext) -> Result<Engine<WithContext>, SDKError> {
+        Ok(Engine {
+            _state: PhantomData,
+            config: self.config,
+            db_pool: self.db_pool,
+            llm_client: self.llm_client,
+            context: Some(ctx.clone()),
+        })
     }
 }

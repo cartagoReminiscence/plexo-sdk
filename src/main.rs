@@ -1,34 +1,30 @@
-use std::{error::Error, sync::Arc};
+use std::error::Error;
 
 use dotenv::dotenv;
 
 use plexo_sdk::{
     backend::{
-        engine::{SDKConfig, SDKEngine},
-        // loaders::SDKLoaders,
+        context::EngineContext,
+        engine::SDKConfig,
+        v2::{Engine, WithContext}, // loaders::SDKLoaders,
     },
-    // cognition::{
-    // operations::{SubdivideTaskInputBuilder, TaskSuggestionInputBuilder},
-    // v2::{operations::CognitionOperationsV2, projects::ProjectSuggestionInputBuilder},
-    // },
-    // common::commons::SortOrder,
-    resources::{
-        projects::{
-            operations::{GetProjectsInputBuilder, ProjectCrudOperations},
-            // relations::ProjectRelations,
-        },
-        // tasks::operations::{GetTasksInputBuilder, TaskCrudOperations},
-    },
+    // organization::operations::OrganizationCrudOperations,
+    resources::projects::operations::{GetProjectsInputBuilder, ProjectCrudOperations},
 };
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
-    let engine = SDKEngine::new(SDKConfig::from_env()).await?;
-    let engine = Arc::new(engine);
+    // let engine = SDKEngine::new(SDKConfig::from_env()).await?;
+    // let engine = Arc::new(engine);
 
-    engine.migrate().await?;
+    // engine.migrate().await?;
+
+    let config = SDKConfig::from_env();
+    let ctx = EngineContext::from_credentials("email", "password").await?;
+
+    let engine = Engine::<WithContext>::new_with_context(&ctx, config).await?;
 
     // let loaders = SDKLoaders::new(engine.clone());
 

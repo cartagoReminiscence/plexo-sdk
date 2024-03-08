@@ -9,7 +9,10 @@ use sqlx::Row;
 use uuid::Uuid;
 
 use crate::{
-    backend::engine::SDKEngine,
+    backend::{
+        engine::SDKEngine,
+        v2::{Engine, WithContext},
+    },
     common::commons::{SortOrder, UpdateListInput},
     errors::sdk::SDKError,
 };
@@ -491,5 +494,76 @@ impl ProjectCrudOperations for SDKEngine {
             .collect::<Vec<Project>>();
 
         Ok(projects)
+    }
+}
+
+#[async_trait]
+impl ProjectCrudOperations for Engine<WithContext> {
+    async fn create_project(&self, _input: CreateProjectInput) -> Result<Project, SDKError> {
+        todo!()
+    }
+
+    async fn get_project(&self, _id: Uuid) -> Result<Project, SDKError> {
+        todo!()
+    }
+
+    async fn get_projects(&self, input: GetProjectsInput) -> Result<Vec<Project>, SDKError> {
+        let mut query = "SELECT * FROM projects ".to_string();
+
+        if let Some(filter) = input.filter {
+            query.push_str(format!("WHERE {} ", filter.compile_sql()).as_str());
+        }
+
+        if let Some(sort_by) = input.sort_by {
+            query.push_str(format!("ORDER BY {} ", sort_by).as_str());
+        }
+
+        if let Some(sort_order) = input.sort_order {
+            query.push_str(format!("{} ", sort_order).as_str());
+        }
+
+        if let Some(limit) = input.limit {
+            query.push_str(format!("LIMIT {} ", limit).as_str());
+        }
+
+        if let Some(offset) = input.offset {
+            query.push_str(format!("OFFSET {} ", offset).as_str());
+        }
+
+        let projects_info = sqlx::query(query.as_str()).fetch_all(self.db_pool.as_ref()).await?;
+
+        let projects = projects_info
+            .iter()
+            .map(|x| Project {
+                id: x.get("id"),
+                created_at: x.get("created_at"),
+                updated_at: x.get("updated_at"),
+                name: x.get("name"),
+                prefix: x.get("prefix"),
+                owner_id: x.get("owner_id"),
+                description: x.get("description"),
+                lead_id: x.get("lead_id"),
+                start_date: x.get("start_date"),
+                due_date: x.get("due_date"),
+                status: x
+                    .get::<'_, Option<String>, _>("status")
+                    .and_then(|a| ProjectStatus::from_str(&a).ok())
+                    .unwrap_or_default(),
+                visibility: x
+                    .get::<'_, Option<String>, _>("visibility")
+                    .and_then(|a| ProjectVisibility::from_str(&a).ok())
+                    .unwrap_or_default(),
+            })
+            .collect::<Vec<Project>>();
+
+        Ok(projects)
+    }
+
+    async fn update_project(&self, _id: Uuid, _input: UpdateProjectInput) -> Result<Project, SDKError> {
+        todo!()
+    }
+
+    async fn delete_project(&self, _id: Uuid) -> Result<Project, SDKError> {
+        todo!()
     }
 }
