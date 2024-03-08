@@ -1,9 +1,7 @@
-use std::{env::var, time::Duration};
+use std::{marker::PhantomData, time::Duration};
 
 use async_openai::{config::OpenAIConfig, Client};
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
-use uuid::Uuid;
-// use tokio::runtime::Handle;
 
 use crate::{
     errors::sdk::SDKError,
@@ -11,44 +9,44 @@ use crate::{
         Organization, OrganizationCrudOperations, OrganizationInitializationInput, SetOrganizationInputBuilder,
         GLOBAL_ORGANIZATION_SETTINGS_NAME,
     },
-    // resources::tasks::task::Task,
 };
-// use crossbeam_channel::unbounded;
 
-pub const VERSION: Option<&str> = option_env!("CARGO_PKG_VERSION");
+use super::{
+    context::EngineContext,
+    engine::{SDKConfig, VERSION},
+};
 
-#[derive(Clone)]
-pub struct SDKConfig {
-    pub database_url: String,
-    pub llm_api_key: String,
-    pub llm_model_name: String,
-}
+pub trait EngineState {}
 
-impl SDKConfig {
-    pub fn from_env() -> SDKConfig {
-        let database_url = var("DATABASE_URL").unwrap();
-        let llm_api_key = var("OPENAI_API_KEY").unwrap();
-        let llm_model_name = var("OPENAI_MODEL_NAME").unwrap_or("gpt-3.5-turbo".to_string());
+pub struct WithContext {}
 
-        SDKConfig {
-            database_url,
-            llm_api_key,
-            llm_model_name,
-        }
-    }
-}
+// impl WithContext {
+//     pub fn new(member_id: Uuid, organization_id: Option<Uuid>) -> WithContext {
+//         WithContext {
+//             context: EngineContext {
+//                 member_id,
+//                 organization_id,
+//             },
+//         }
+//     }
+// }
 
-#[derive(Clone)]
-pub struct SDKEngine {
+impl EngineState for WithContext {}
+
+pub struct WithoutContext;
+impl EngineState for WithoutContext {}
+
+pub struct Engine<State: EngineState> {
+    _state: PhantomData<State>,
+
     pub config: SDKConfig,
     pub db_pool: Box<Pool<Postgres>>,
     pub llm_client: Box<Client<OpenAIConfig>>,
-    // pub task_event_send: crossbeam_channel::Sender<Task>,
-    // pub task_event_recv: crossbeam_channel::Receiver<Task>,
+    pub context: Option<EngineContext>,
 }
 
-impl SDKEngine {
-    pub async fn new(config: SDKConfig) -> Result<SDKEngine, SDKError> {
+impl Engine<WithoutContext> {
+    pub async fn new(config: SDKConfig) -> Result<Engine<WithoutContext>, SDKError> {
         let pool = PgPoolOptions::new()
             .max_connections(10)
             .acquire_timeout(Duration::from_secs(60))
@@ -61,22 +59,17 @@ impl SDKEngine {
 
         let db_pool = Box::new(pool);
 
-        // let (task_event_send, task_event_recv) = unbounded::<Task>();
-
-        let engine = SDKEngine {
+        Ok(Engine {
+            _state: PhantomData,
             config,
             db_pool,
             llm_client,
-            // task_event_send,
-            // task_event_recv,
-        };
-
-        Ok(engine)
+            context: None,
+        })
     }
 
     pub async fn migrate(&self) -> Result<(), SDKError> {
         sqlx::migrate!().run(self.db_pool.as_ref()).await?;
-
         Ok(())
     }
 
@@ -89,7 +82,7 @@ impl SDKEngine {
 
     pub async fn initialize_organization(
         &self,
-        owner_id: Uuid,
+        ctx: &EngineContext,
         value: OrganizationInitializationInput,
     ) -> Result<Organization, SDKError> {
         let org_serialized = serde_json::to_string(&value)?;
@@ -97,7 +90,7 @@ impl SDKEngine {
         let org = self
             .set_organization_setting(
                 SetOrganizationInputBuilder::default()
-                    .owner_id(owner_id)
+                    .owner_id(ctx.member_id)
                     .name(GLOBAL_ORGANIZATION_SETTINGS_NAME.to_string())
                     .value(org_serialized)
                     .build()
