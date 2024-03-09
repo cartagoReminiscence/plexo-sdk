@@ -8,7 +8,7 @@ use plexo_sdk::{
         engine::SDKConfig,
         v2::{Engine, WithContext}, // loaders::SDKLoaders,
     },
-    // organization::operations::OrganizationCrudOperations,
+    organization::operations::CreateOrganizationInputBuilder,
     resources::projects::operations::{GetProjectsInputBuilder, ProjectCrudOperations},
 };
 
@@ -22,17 +22,27 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // engine.migrate().await?;
 
     let config = SDKConfig::from_env();
+    // let loaders = SDKLoaders::new(engine.clone());
     let ctx = EngineContext::from_credentials("email", "password").await?;
 
     let engine = Engine::<WithContext>::new_with_context(&ctx, config).await?;
-
-    // let loaders = SDKLoaders::new(engine.clone());
 
     println!("version: {:?}", engine.version()?);
 
     let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
 
     println!("projects: {:?}", projects);
+
+    engine
+        .initialize_organization(
+            CreateOrganizationInputBuilder::default()
+                .owner_id(ctx.member_id)
+                .photo_url("https://www.google.com".to_string())
+                .name("test org".to_string())
+                .email("foo@bar.com".to_string())
+                .build()?,
+        )
+        .await?;
 
     // let lead = project.lead(&loaders).await?;
 

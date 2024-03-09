@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::{
     backend::{
         engine::SDKEngine,
-        v2::{Engine, WithoutContext},
+        v2::{Engine, WithContext, WithoutContext},
     },
     errors::sdk::SDKError,
 };
@@ -49,7 +49,7 @@ pub struct OrganizationSettings {
 
 #[derive(Debug, Builder, Clone, Serialize, Deserialize)]
 #[builder(pattern = "owned")]
-pub struct OrganizationInitializationInput {
+pub struct CreateOrganizationInput {
     pub owner_id: Uuid,
     pub name: String,
     pub photo_url: String,
@@ -208,6 +208,91 @@ impl OrganizationCrudOperations for SDKEngine {
 
 #[async_trait]
 impl OrganizationCrudOperations for Engine<WithoutContext> {
+    async fn get_organization(&self) -> Result<Option<Organization>, SDKError> {
+        let principal_settings = self
+            .get_organization_setting(GLOBAL_ORGANIZATION_SETTINGS_NAME.to_string())
+            .await?;
+
+        Ok(principal_settings.map(|org| org.into()))
+    }
+
+    async fn update_organization(&self, _input: UpdateOrganizationInput) -> Result<Organization, SDKError> {
+        todo!()
+    }
+
+    async fn get_organization_settings(&self) -> Result<Vec<OrganizationSettings>, SDKError> {
+        let task_info = sqlx::query!(
+            r#"
+            SELECT * FROM organization
+            "#,
+        )
+        .fetch_all(self.db_pool.as_ref())
+        .await?;
+
+        Ok(task_info
+            .into_iter()
+            .map(|task_info| OrganizationSettings {
+                id: task_info.id,
+                created_at: task_info.created_at,
+                updated_at: task_info.updated_at,
+                owner_id: task_info.owner_id,
+                name: task_info.name,
+                value: task_info.value,
+            })
+            .collect())
+    }
+
+    async fn set_organization_setting(&self, input: SetOrganizationInput) -> Result<OrganizationSettings, SDKError> {
+        let task_info = sqlx::query!(
+            r#"
+            INSERT INTO organization (name, value, owner_id)
+            VALUES ($1, $2, $3)
+            RETURNING *
+            "#,
+            input.name,
+            input.value,
+            input.owner_id
+        )
+        .fetch_one(self.db_pool.as_ref())
+        .await?;
+
+        Ok(OrganizationSettings {
+            id: task_info.id,
+            created_at: task_info.created_at,
+            updated_at: task_info.updated_at,
+            owner_id: task_info.owner_id,
+            name: task_info.name,
+            value: task_info.value,
+        })
+    }
+
+    async fn get_organization_setting(&self, name: String) -> Result<Option<OrganizationSettings>, SDKError> {
+        let task_info = sqlx::query!(
+            r#"
+            SELECT * FROM organization WHERE name = $1
+            "#,
+            name,
+        )
+        .fetch_one(self.db_pool.as_ref())
+        .await;
+
+        match task_info {
+            Err(sqlx::Error::RowNotFound) => return Ok(None),
+            Err(err) => return Err(err.into()),
+            Ok(task_info) => Ok(Some(OrganizationSettings {
+                id: task_info.id,
+                created_at: task_info.created_at,
+                updated_at: task_info.updated_at,
+                owner_id: task_info.owner_id,
+                name: task_info.name,
+                value: task_info.value,
+            })),
+        }
+    }
+}
+
+#[async_trait]
+impl OrganizationCrudOperations for Engine<WithContext> {
     async fn get_organization(&self) -> Result<Option<Organization>, SDKError> {
         let principal_settings = self
             .get_organization_setting(GLOBAL_ORGANIZATION_SETTINGS_NAME.to_string())

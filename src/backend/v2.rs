@@ -6,7 +6,7 @@ use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use crate::{
     errors::sdk::SDKError,
     organization::operations::{
-        Organization, OrganizationCrudOperations, OrganizationInitializationInput, SetOrganizationInputBuilder,
+        CreateOrganizationInput, Organization, OrganizationCrudOperations, SetOrganizationInputBuilder,
         GLOBAL_ORGANIZATION_SETTINGS_NAME,
     },
 };
@@ -36,6 +36,7 @@ impl EngineState for WithContext {}
 pub struct WithoutContext;
 impl EngineState for WithoutContext {}
 
+#[derive(Clone)]
 pub struct Engine<State: EngineState> {
     _state: PhantomData<State>,
 
@@ -49,7 +50,7 @@ impl Engine<WithoutContext> {
     pub async fn initialize_organization(
         &self,
         ctx: &EngineContext,
-        value: OrganizationInitializationInput,
+        value: CreateOrganizationInput,
     ) -> Result<Organization, SDKError> {
         let org_serialized = serde_json::to_string(&value)?;
 
@@ -123,5 +124,32 @@ impl Engine<WithoutContext> {
             llm_client: self.llm_client,
             context: Some(ctx.clone()),
         })
+    }
+}
+
+impl Engine<WithContext> {
+    fn without_context(&self) -> Engine<WithoutContext> {
+        // Engine {
+        //     _state: PhantomData,
+        //     config: self.config,
+        //     db_pool: self.db_pool,
+        //     llm_client: self.llm_client,
+        //     context: None,
+        // }
+        Engine::<WithoutContext> {
+            _state: PhantomData,
+            config: self.config.clone(),
+            db_pool: self.db_pool.clone(),
+            llm_client: self.llm_client.clone(),
+            context: None,
+        }
+    }
+}
+
+impl Engine<WithContext> {
+    pub async fn initialize_organization(&self, value: CreateOrganizationInput) -> Result<Organization, SDKError> {
+        let ctx = self.context.clone().unwrap();
+
+        self.without_context().initialize_organization(&ctx, value).await
     }
 }

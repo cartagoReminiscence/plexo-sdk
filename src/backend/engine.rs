@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::{
     errors::sdk::SDKError,
     organization::operations::{
-        Organization, OrganizationCrudOperations, OrganizationInitializationInput, SetOrganizationInputBuilder,
+        CreateOrganizationInput, Organization, OrganizationCrudOperations, SetOrganizationInputBuilder,
         GLOBAL_ORGANIZATION_SETTINGS_NAME,
     },
     // resources::tasks::task::Task,
@@ -90,7 +90,7 @@ impl SDKEngine {
     pub async fn initialize_organization(
         &self,
         owner_id: Uuid,
-        value: OrganizationInitializationInput,
+        value: CreateOrganizationInput,
     ) -> Result<Organization, SDKError> {
         let org_serialized = serde_json::to_string(&value)?;
 
