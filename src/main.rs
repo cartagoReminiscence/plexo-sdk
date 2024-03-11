@@ -23,7 +23,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let config = SDKConfig::from_env();
     // let loaders = SDKLoaders::new(engine.clone());
-    let ctx = EngineContext::from_credentials("email", "password").await?;
+    // let ctx = EngineContext::from_credentials("email", "password").await?;
+    let ctx = EngineContext::from_token("").await?;
 
     let engine = Engine::<WithContext>::new_with_context(&ctx, config).await?;
 

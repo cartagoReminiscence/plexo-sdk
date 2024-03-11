@@ -14,4 +14,7 @@ pub enum SDKError {
     SerdeJSONError(#[from] serde_json::Error),
     #[error("OpenAI Error")]
     OpenAIError(#[from] async_openai::error::OpenAIError),
+
+    #[error("ContextNotFound")]
+    ContextNotFound,
 }

@@ -18,7 +18,10 @@ use super::{
 
 pub trait EngineState {}
 
-pub struct WithContext {}
+#[derive(Clone)]
+pub struct WithContext {
+    pub context: EngineContext,
+}
 
 // impl WithContext {
 //     pub fn new(member_id: Uuid, organization_id: Option<Uuid>) -> WithContext {
@@ -33,6 +36,7 @@ pub struct WithContext {}
 
 impl EngineState for WithContext {}
 
+#[derive(Clone)]
 pub struct WithoutContext;
 impl EngineState for WithoutContext {}
 
@@ -43,7 +47,7 @@ pub struct Engine<State: EngineState> {
     pub config: SDKConfig,
     pub db_pool: Box<Pool<Postgres>>,
     pub llm_client: Box<Client<OpenAIConfig>>,
-    pub context: Option<EngineContext>,
+    pub state: State,
 }
 
 impl Engine<WithoutContext> {
@@ -98,7 +102,7 @@ where
             config,
             db_pool,
             llm_client,
-            context: None,
+            state: WithoutContext {},
         })
     }
 
@@ -122,7 +126,7 @@ impl Engine<WithoutContext> {
             config: self.config,
             db_pool: self.db_pool,
             llm_client: self.llm_client,
-            context: Some(ctx.clone()),
+            state: WithContext { context: ctx.clone() },
         })
     }
 }
@@ -141,14 +145,14 @@ impl Engine<WithContext> {
             config: self.config.clone(),
             db_pool: self.db_pool.clone(),
             llm_client: self.llm_client.clone(),
-            context: None,
+            state: WithoutContext {},
         }
     }
 }
 
 impl Engine<WithContext> {
     pub async fn initialize_organization(&self, value: CreateOrganizationInput) -> Result<Organization, SDKError> {
-        let ctx = self.context.clone().unwrap();
+        let ctx = self.state.context.clone();
 
         self.without_context().initialize_organization(&ctx, value).await
     }
