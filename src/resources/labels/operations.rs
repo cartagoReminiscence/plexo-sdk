@@ -5,12 +5,28 @@ use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
-use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{
+    backend::{
+        context::EngineContext,
+        v2::{Engine, WithContext, WithoutContext},
+    },
+    common::commons::SortOrder,
+    errors::sdk::SDKError,
+};
 
 use super::label::Label;
 
 #[async_trait]
 pub trait LabelCrudOperations {
+    async fn create_label(&self, ctx: EngineContext, input: CreateLabelInput) -> Result<Label, SDKError>;
+    async fn get_label(&self, ctx: EngineContext, id: Uuid) -> Result<Label, SDKError>;
+    async fn get_labels(&self, ctx: EngineContext, input: GetLabelsInput) -> Result<Vec<Label>, SDKError>;
+    async fn update_label(&self, ctx: EngineContext, id: Uuid, input: UpdateLabelInput) -> Result<Label, SDKError>;
+    async fn delete_label(&self, ctx: EngineContext, id: Uuid) -> Result<Label, SDKError>;
+}
+
+#[async_trait]
+pub trait LabelCrudOperationsWithContext {
     async fn create_label(&self, input: CreateLabelInput) -> Result<Label, SDKError>;
     async fn get_label(&self, id: Uuid) -> Result<Label, SDKError>;
     async fn get_labels(&self, input: GetLabelsInput) -> Result<Vec<Label>, SDKError>;
@@ -23,9 +39,8 @@ pub trait LabelCrudOperations {
 pub struct CreateLabelInput {
     pub name: String,
 
-    #[graphql(skip)]
-    pub owner_id: Uuid,
-
+    // #[graphql(skip)]
+    // pub owner_id: Uuid,
     #[builder(setter(strip_option), default)]
     pub description: Option<String>,
     #[builder(setter(strip_option), default)]
@@ -132,8 +147,8 @@ impl GetLabelsWhere {
 }
 
 #[async_trait]
-impl LabelCrudOperations for SDKEngine {
-    async fn create_label(&self, input: CreateLabelInput) -> Result<Label, SDKError> {
+impl LabelCrudOperations for Engine<WithoutContext> {
+    async fn create_label(&self, ctx: EngineContext, input: CreateLabelInput) -> Result<Label, SDKError> {
         let label_info = sqlx::query!(
             r#"
             INSERT INTO labels (name, description, color, owner_id)
@@ -143,7 +158,7 @@ impl LabelCrudOperations for SDKEngine {
             input.name,
             input.description,
             input.color,
-            input.owner_id,
+            ctx.member_id,
         )
         .fetch_one(self.db_pool.as_ref())
         .await?;
@@ -159,7 +174,7 @@ impl LabelCrudOperations for SDKEngine {
         })
     }
 
-    async fn get_label(&self, id: Uuid) -> Result<Label, SDKError> {
+    async fn get_label(&self, _ctx: EngineContext, id: Uuid) -> Result<Label, SDKError> {
         let label_info = sqlx::query!(
             r#"
             SELECT * FROM labels
@@ -181,7 +196,7 @@ impl LabelCrudOperations for SDKEngine {
         })
     }
 
-    async fn get_labels(&self, input: GetLabelsInput) -> Result<Vec<Label>, SDKError> {
+    async fn get_labels(&self, _ctx: EngineContext, input: GetLabelsInput) -> Result<Vec<Label>, SDKError> {
         let mut query = "SELECT * FROM labels ".to_string();
 
         if let Some(filter) = input.filter {
@@ -222,7 +237,7 @@ impl LabelCrudOperations for SDKEngine {
         Ok(labels)
     }
 
-    async fn update_label(&self, id: Uuid, input: UpdateLabelInput) -> Result<Label, SDKError> {
+    async fn update_label(&self, _ctx: EngineContext, id: Uuid, input: UpdateLabelInput) -> Result<Label, SDKError> {
         let label_info = sqlx::query!(
             r#"
             UPDATE labels
@@ -252,7 +267,7 @@ impl LabelCrudOperations for SDKEngine {
         })
     }
 
-    async fn delete_label(&self, id: Uuid) -> Result<Label, SDKError> {
+    async fn delete_label(&self, _ctx: EngineContext, id: Uuid) -> Result<Label, SDKError> {
         let label_info = sqlx::query!(
             r#"
             DELETE FROM labels WHERE id = $1
@@ -272,5 +287,36 @@ impl LabelCrudOperations for SDKEngine {
             description: label_info.description,
             color: label_info.color,
         })
+    }
+}
+
+#[async_trait]
+impl LabelCrudOperationsWithContext for Engine<WithContext> {
+    async fn create_label(&self, input: CreateLabelInput) -> Result<Label, SDKError> {
+        self.without_context()
+            .create_label(self.state.context.clone(), input)
+            .await
+    }
+
+    async fn get_label(&self, id: Uuid) -> Result<Label, SDKError> {
+        self.without_context().get_label(self.state.context.clone(), id).await
+    }
+
+    async fn get_labels(&self, input: GetLabelsInput) -> Result<Vec<Label>, SDKError> {
+        self.without_context()
+            .get_labels(self.state.context.clone(), input)
+            .await
+    }
+
+    async fn update_label(&self, id: Uuid, input: UpdateLabelInput) -> Result<Label, SDKError> {
+        self.without_context()
+            .update_label(self.state.context.clone(), id, input)
+            .await
+    }
+
+    async fn delete_label(&self, id: Uuid) -> Result<Label, SDKError> {
+        self.without_context()
+            .delete_label(self.state.context.clone(), id)
+            .await
     }
 }

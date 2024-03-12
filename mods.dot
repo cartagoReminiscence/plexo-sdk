@@ -1,0 +1,149 @@
+digraph {
+
+    graph [
+        label="plexo_sdk",
+        labelloc=t,
+
+        pad=0.4,
+
+        // Consider rendering the graph using a different layout algorithm, such as:
+        // [dot, neato, twopi, circo, fdp, sfdp]
+        layout=neato,
+        overlap=false,
+        splines="line",
+        rankdir=LR,
+
+        fontname="Helvetica", 
+        fontsize="36",
+    ];
+
+    node [
+        fontname="monospace",
+        fontsize="10",
+        shape="record",
+        style="filled",
+    ];
+
+    edge [
+        fontname="monospace",
+        fontsize="10",
+    ];
+
+    "plexo_sdk" [label="crate|plexo_sdk", fillcolor="#5397c8"]; // "crate" node
+    "plexo_sdk::backend" [label="pub mod|backend", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::backend::context" [label="pub mod|backend::context", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::backend::engine" [label="pub mod|backend::engine", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::backend::loaders" [label="pub mod|backend::loaders", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::backend::v2" [label="pub mod|backend::v2", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::cognition" [label="pub mod|cognition", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::cognition::operations" [label="pub mod|cognition::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::cognition::suggestions" [label="pub mod|cognition::suggestions", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::cognition::v2" [label="pub mod|cognition::v2", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::cognition::v2::operations" [label="pub mod|cognition::v2::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::cognition::v2::projects" [label="pub mod|cognition::v2::projects", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::common" [label="pub mod|common", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::common::commons" [label="pub mod|common::commons", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::errors" [label="pub mod|errors", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::errors::sdk" [label="pub mod|errors::sdk", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::organization" [label="pub mod|organization", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::organization::operations" [label="pub mod|organization::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources" [label="pub mod|resources", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::assets" [label="pub mod|resources::assets", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::assets::asset" [label="pub mod|resources::assets::asset", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::assets::extensions" [label="pub mod|resources::assets::extensions", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::assets::loader" [label="pub mod|resources::assets::loader", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::assets::operations" [label="pub mod|resources::assets::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::assets::relations" [label="pub mod|resources::assets::relations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::changes" [label="pub mod|resources::changes", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::changes::change" [label="pub mod|resources::changes::change", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::changes::loader" [label="pub mod|resources::changes::loader", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::changes::operations" [label="pub mod|resources::changes::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::changes::relations" [label="pub mod|resources::changes::relations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::labels" [label="pub mod|resources::labels", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::labels::label" [label="pub mod|resources::labels::label", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::labels::loader" [label="pub mod|resources::labels::loader", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::labels::operations" [label="pub mod|resources::labels::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::labels::relations" [label="pub mod|resources::labels::relations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::members" [label="pub mod|resources::members", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::members::extensions" [label="pub mod|resources::members::extensions", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::members::loader" [label="pub mod|resources::members::loader", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::members::member" [label="pub mod|resources::members::member", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::members::operations" [label="pub mod|resources::members::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::members::relations" [label="pub mod|resources::members::relations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::projects" [label="pub mod|resources::projects", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::projects::loader" [label="pub mod|resources::projects::loader", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::projects::operations" [label="pub mod|resources::projects::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::projects::project" [label="pub mod|resources::projects::project", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::projects::relations" [label="pub mod|resources::projects::relations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::tasks" [label="pub mod|resources::tasks", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::tasks::extensions" [label="pub mod|resources::tasks::extensions", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::tasks::loader" [label="pub mod|resources::tasks::loader", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::tasks::operations" [label="pub mod|resources::tasks::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::tasks::relations" [label="pub mod|resources::tasks::relations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::tasks::task" [label="pub mod|resources::tasks::task", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::tasks::watchers" [label="pub mod|resources::tasks::watchers", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::teams" [label="pub mod|resources::teams", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::teams::loader" [label="pub mod|resources::teams::loader", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::teams::operations" [label="pub mod|resources::teams::operations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::teams::relations" [label="pub mod|resources::teams::relations", fillcolor="#81c169"]; // "mod" node
+    "plexo_sdk::resources::teams::team" [label="pub mod|resources::teams::team", fillcolor="#81c169"]; // "mod" node
+
+    "plexo_sdk" -> "plexo_sdk::backend" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk" -> "plexo_sdk::cognition" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk" -> "plexo_sdk::common" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk" -> "plexo_sdk::errors" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk" -> "plexo_sdk::organization" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk" -> "plexo_sdk::resources" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::backend" -> "plexo_sdk::backend::context" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::backend" -> "plexo_sdk::backend::engine" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::backend" -> "plexo_sdk::backend::loaders" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::backend" -> "plexo_sdk::backend::v2" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::cognition" -> "plexo_sdk::cognition::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::cognition" -> "plexo_sdk::cognition::suggestions" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::cognition" -> "plexo_sdk::cognition::v2" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::cognition::v2" -> "plexo_sdk::cognition::v2::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::cognition::v2" -> "plexo_sdk::cognition::v2::projects" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::common" -> "plexo_sdk::common::commons" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::errors" -> "plexo_sdk::errors::sdk" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::organization" -> "plexo_sdk::organization::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources" -> "plexo_sdk::resources::assets" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources" -> "plexo_sdk::resources::changes" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources" -> "plexo_sdk::resources::labels" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources" -> "plexo_sdk::resources::members" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources" -> "plexo_sdk::resources::projects" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources" -> "plexo_sdk::resources::tasks" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources" -> "plexo_sdk::resources::teams" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::assets" -> "plexo_sdk::resources::assets::asset" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::assets" -> "plexo_sdk::resources::assets::extensions" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::assets" -> "plexo_sdk::resources::assets::loader" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::assets" -> "plexo_sdk::resources::assets::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::assets" -> "plexo_sdk::resources::assets::relations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::changes" -> "plexo_sdk::resources::changes::change" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::changes" -> "plexo_sdk::resources::changes::loader" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::changes" -> "plexo_sdk::resources::changes::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::changes" -> "plexo_sdk::resources::changes::relations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::labels" -> "plexo_sdk::resources::labels::label" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::labels" -> "plexo_sdk::resources::labels::loader" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::labels" -> "plexo_sdk::resources::labels::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::labels" -> "plexo_sdk::resources::labels::relations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::members" -> "plexo_sdk::resources::members::extensions" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::members" -> "plexo_sdk::resources::members::loader" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::members" -> "plexo_sdk::resources::members::member" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::members" -> "plexo_sdk::resources::members::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::members" -> "plexo_sdk::resources::members::relations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::projects" -> "plexo_sdk::resources::projects::loader" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::projects" -> "plexo_sdk::resources::projects::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::projects" -> "plexo_sdk::resources::projects::project" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::projects" -> "plexo_sdk::resources::projects::relations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::tasks" -> "plexo_sdk::resources::tasks::extensions" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::tasks" -> "plexo_sdk::resources::tasks::loader" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::tasks" -> "plexo_sdk::resources::tasks::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::tasks" -> "plexo_sdk::resources::tasks::relations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::tasks" -> "plexo_sdk::resources::tasks::task" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::tasks" -> "plexo_sdk::resources::tasks::watchers" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::teams" -> "plexo_sdk::resources::teams::loader" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::teams" -> "plexo_sdk::resources::teams::operations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::teams" -> "plexo_sdk::resources::teams::relations" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "plexo_sdk::resources::teams" -> "plexo_sdk::resources::teams::team" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+
+}

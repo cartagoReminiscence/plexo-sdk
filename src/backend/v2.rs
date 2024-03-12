@@ -14,13 +14,15 @@ use crate::{
 use super::{
     context::EngineContext,
     engine::{SDKConfig, VERSION},
+    loaders::SDKLoaders,
 };
 
 pub trait EngineState {}
 
-#[derive(Clone)]
+// #[derive(Clone)]
 pub struct WithContext {
     pub context: EngineContext,
+    // pub loaders: SDKLoaders,
 }
 
 // impl WithContext {
@@ -42,12 +44,11 @@ impl EngineState for WithoutContext {}
 
 #[derive(Clone)]
 pub struct Engine<State: EngineState> {
-    _state: PhantomData<State>,
+    pub state: State,
 
     pub config: SDKConfig,
     pub db_pool: Box<Pool<Postgres>>,
     pub llm_client: Box<Client<OpenAIConfig>>,
-    pub state: State,
 }
 
 impl Engine<WithoutContext> {
@@ -98,7 +99,6 @@ where
         let db_pool = Box::new(pool);
 
         Ok(Engine {
-            _state: PhantomData,
             config,
             db_pool,
             llm_client,
@@ -122,7 +122,6 @@ where
 impl Engine<WithoutContext> {
     pub async fn with_context(self, ctx: &EngineContext) -> Result<Engine<WithContext>, SDKError> {
         Ok(Engine {
-            _state: PhantomData,
             config: self.config,
             db_pool: self.db_pool,
             llm_client: self.llm_client,
@@ -132,7 +131,7 @@ impl Engine<WithoutContext> {
 }
 
 impl Engine<WithContext> {
-    fn without_context(&self) -> Engine<WithoutContext> {
+    pub fn without_context(&self) -> Engine<WithoutContext> {
         // Engine {
         //     _state: PhantomData,
         //     config: self.config,
@@ -141,7 +140,6 @@ impl Engine<WithContext> {
         //     context: None,
         // }
         Engine::<WithoutContext> {
-            _state: PhantomData,
             config: self.config.clone(),
             db_pool: self.db_pool.clone(),
             llm_client: self.llm_client.clone(),

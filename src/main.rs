@@ -1,30 +1,37 @@
-use std::error::Error;
+use std::{error::Error, sync::Arc};
 
 use dotenv::dotenv;
 
 use plexo_sdk::{
     backend::{
-        context::EngineContext,
-        engine::SDKConfig,
+        context::{Contextualized, EngineContext},
+        engine::{SDKConfig, SDKEngine},
+        loaders::SDKLoaders,
         v2::{Engine, WithContext}, // loaders::SDKLoaders,
     },
     organization::operations::CreateOrganizationInputBuilder,
-    resources::projects::operations::{GetProjectsInputBuilder, ProjectCrudOperations},
+    resources::projects::{
+        operations::{GetProjectsInputBuilder, ProjectCrudOperations},
+        project,
+        relations::ProjectRelations,
+    },
 };
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
-    // let engine = SDKEngine::new(SDKConfig::from_env()).await?;
-    // let engine = Arc::new(engine);
+    let engine = SDKEngine::new(SDKConfig::from_env()).await?;
+
+    let engine = Arc::new(engine);
 
     // engine.migrate().await?;
 
     let config = SDKConfig::from_env();
-    // let loaders = SDKLoaders::new(engine.clone());
+    let loaders = SDKLoaders::new(engine.clone());
     // let ctx = EngineContext::from_credentials("email", "password").await?;
-    let ctx = EngineContext::from_token("").await?;
+    // let ctx = EngineContext::from_token("").await?;
+    let ctx = engine.login_with_token("").await?;
 
     let engine = Engine::<WithContext>::new_with_context(&ctx, config).await?;
 
@@ -45,7 +52,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
         )
         .await?;
 
+    let project = projects.first().unwrap().to_owned();
+
+    // let project = Project::<WithContext>::new();
+
     // let lead = project.lead(&loaders).await?;
+    // project.lead().await?;
 
     // let task = engine
     //     .get_tasks(

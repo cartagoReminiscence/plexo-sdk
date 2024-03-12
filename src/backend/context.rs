@@ -1,42 +1,64 @@
 use uuid::Uuid;
 
-use crate::errors::sdk::SDKError;
+use crate::{errors::sdk::SDKError, resources::members::extensions::MembersExtensionOperations};
+
+use super::engine::SDKEngine;
 
 #[derive(Clone)]
 pub struct EngineContext {
     pub member_id: Uuid,
     // organization_id: Option<Uuid>,
+    // pub loaders: SDKLoaders,
     _token: String,
 }
 
-impl EngineContext {
-    pub async fn from_credentials(_email: &'static str, _password: &'static str) -> Result<EngineContext, SDKError> {
-        // let Ok(Some(member)) = plexo_engine.engine.get_member_by_email(email.clone()).await else {
-        //     return Err(PlexoAppError::EmailNotFound.into());
-        // };
+pub trait Contextualized {
+    fn login_with_credentials(
+        &self,
+        email: &'static str,
+        password: &'static str,
+    ) -> impl std::future::Future<Output = Result<EngineContext, SDKError>> + Send;
 
-        // let Some(password_hash) = member.password_hash.clone() else {
-        //     return Err(PlexoAppError::InvalidPassword.into());
-        // };
+    fn login_with_token(
+        &self,
+        token: &'static str,
+    ) -> impl std::future::Future<Output = Result<EngineContext, SDKError>> + Send;
+}
 
-        // if !plexo_engine
-        //     .auth
-        //     .validate_password(password.as_str(), password_hash.as_str())
-        // {
-        //     return Err(PlexoAppError::InvalidPassword.into());
-        // };
+impl Contextualized for SDKEngine {
+    async fn login_with_credentials(
+        &self,
+        email: &'static str,
+        password: &'static str,
+    ) -> Result<EngineContext, SDKError> {
+        let Ok(Some(member)) = self.get_member_by_email(email.to_string()).await else {
+            return Err(SDKError::EmailNotFound);
+        };
 
-        // let Ok(session_token) = plexo_engine.auth.jwt_engine.create_session_token(&member) else {
-        //     return Err(PlexoAppError::InvalidPassword.into());
-        // };
+        let Some(password_hash) = member.password_hash.clone() else {
+            return Err(SDKError::InvalidPassword);
+        };
+
+        if !self.auth.validate_password(password, password_hash.as_str()) {
+            return Err(SDKError::InvalidPassword);
+        };
+
+        let Ok(session_token) = self.auth.jwt_engine.create_session_token(&member) else {
+            return Err(SDKError::InvalidPassword);
+        };
 
         Ok(EngineContext {
-            member_id: Uuid::new_v4(),
-            _token: String::default(),
+            member_id: member.id,
+            _token: session_token,
         })
     }
 
-    pub async fn from_token(_token: &'static str) -> Result<EngineContext, SDKError> {
-        todo!()
+    async fn login_with_token(&self, token: &'static str) -> Result<EngineContext, SDKError> {
+        let claims = self.auth.jwt_engine.decode_session_token(token)?;
+
+        Ok(EngineContext {
+            member_id: claims.member_id(),
+            _token: token.to_string(),
+        })
     }
 }
