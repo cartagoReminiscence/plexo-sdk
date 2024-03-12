@@ -8,7 +8,7 @@ use uuid::Uuid;
 use crate::{
     backend::{
         context::EngineContext,
-        v2::{Engine, WithContext, WithoutContext},
+        v2::{Engine, WithoutContext},
     },
     common::commons::SortOrder,
     errors::sdk::SDKError,
@@ -23,15 +23,6 @@ pub trait LabelCrudOperations {
     async fn get_labels(&self, ctx: EngineContext, input: GetLabelsInput) -> Result<Vec<Label>, SDKError>;
     async fn update_label(&self, ctx: EngineContext, id: Uuid, input: UpdateLabelInput) -> Result<Label, SDKError>;
     async fn delete_label(&self, ctx: EngineContext, id: Uuid) -> Result<Label, SDKError>;
-}
-
-#[async_trait]
-pub trait LabelCrudOperationsWithContext {
-    async fn create_label(&self, input: CreateLabelInput) -> Result<Label, SDKError>;
-    async fn get_label(&self, id: Uuid) -> Result<Label, SDKError>;
-    async fn get_labels(&self, input: GetLabelsInput) -> Result<Vec<Label>, SDKError>;
-    async fn update_label(&self, id: Uuid, input: UpdateLabelInput) -> Result<Label, SDKError>;
-    async fn delete_label(&self, id: Uuid) -> Result<Label, SDKError>;
 }
 
 #[derive(Default, Builder, Object, InputObject)]

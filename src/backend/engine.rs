@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use async_openai::{config::OpenAIConfig, Client};
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 // use tokio::runtime::Handle;
 

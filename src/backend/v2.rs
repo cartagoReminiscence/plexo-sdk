@@ -1,22 +1,9 @@
-use std::time::Duration;
-
 use async_openai::{config::OpenAIConfig, Client};
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use sqlx::{Pool, Postgres};
 
-use crate::{
-    auth::engine::AuthEngine,
-    errors::sdk::SDKError,
-    organization::operations::{
-        CreateOrganizationInput, Organization, OrganizationCrudOperations, SetOrganizationInputBuilder,
-        GLOBAL_ORGANIZATION_SETTINGS_NAME,
-    },
-};
+use crate::auth::engine::AuthEngine;
 
-use super::{
-    config::{SDKConfig, VERSION},
-    context::EngineContext,
-    loaders::SDKLoaders,
-};
+use super::{config::SDKConfig, context::EngineContext, loaders::SDKLoaders};
 
 pub trait EngineState {}
 
