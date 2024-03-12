@@ -80,7 +80,7 @@ pub struct PlexoSystemTemplate {}
 #[derive(Template)]
 #[template(path = "project_suggestion.md.jinja", ext = "plain")]
 pub struct ProjectSuggestionTemplate {
-    description: String,
+    title: String,
     generate_tasks_number: u8,
     projects: Vec<Project>,
     initial_state: Option<ProjectSuggestionInput>,
@@ -224,12 +224,12 @@ impl CognitionOperationsV2 for SDKEngine {
             )
             .await?;
 
-        let description = input.description.clone();
+        let title = input.title.clone();
         let generate_tasks_number = input.generate_tasks_number.unwrap_or(0);
         let initial_tasks = input.initial_tasks.clone();
 
         let input_message = ProjectSuggestionTemplate {
-            description,
+            title,
             projects,
             generate_tasks_number,
             initial_tasks,

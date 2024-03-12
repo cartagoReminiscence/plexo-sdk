@@ -26,13 +26,13 @@ pub struct ProjectTaskSuggestionInput {
 #[derive(Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct ProjectSuggestionInput {
-    pub description: String,
+    pub title: String,
 
     #[builder(setter(strip_option), default)]
     pub initial_tasks: Option<Vec<ProjectTaskSuggestionInput>>,
 
     #[builder(setter(strip_option), default)]
-    pub title: Option<String>,
+    pub description: Option<String>,
     #[builder(setter(strip_option), default)]
     pub generate_tasks_number: Option<u8>,
 }
