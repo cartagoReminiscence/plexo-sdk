@@ -290,33 +290,33 @@ impl LabelCrudOperations for Engine<WithoutContext> {
     }
 }
 
-#[async_trait]
-impl LabelCrudOperationsWithContext for Engine<WithContext> {
-    async fn create_label(&self, input: CreateLabelInput) -> Result<Label, SDKError> {
-        self.without_context()
-            .create_label(self.state.context.clone(), input)
-            .await
-    }
+// #[async_trait]
+// impl LabelCrudOperationsWithContext for Engine<WithContext> {
+//     async fn create_label(&self, input: CreateLabelInput) -> Result<Label, SDKError> {
+//         self.without_context()
+//             .create_label(self.state.context.clone(), input)
+//             .await
+//     }
 
-    async fn get_label(&self, id: Uuid) -> Result<Label, SDKError> {
-        self.without_context().get_label(self.state.context.clone(), id).await
-    }
+//     async fn get_label(&self, id: Uuid) -> Result<Label, SDKError> {
+//         self.without_context().get_label(self.state.context.clone(), id).await
+//     }
 
-    async fn get_labels(&self, input: GetLabelsInput) -> Result<Vec<Label>, SDKError> {
-        self.without_context()
-            .get_labels(self.state.context.clone(), input)
-            .await
-    }
+//     async fn get_labels(&self, input: GetLabelsInput) -> Result<Vec<Label>, SDKError> {
+//         self.without_context()
+//             .get_labels(self.state.context.clone(), input)
+//             .await
+//     }
 
-    async fn update_label(&self, id: Uuid, input: UpdateLabelInput) -> Result<Label, SDKError> {
-        self.without_context()
-            .update_label(self.state.context.clone(), id, input)
-            .await
-    }
+//     async fn update_label(&self, id: Uuid, input: UpdateLabelInput) -> Result<Label, SDKError> {
+//         self.without_context()
+//             .update_label(self.state.context.clone(), id, input)
+//             .await
+//     }
 
-    async fn delete_label(&self, id: Uuid) -> Result<Label, SDKError> {
-        self.without_context()
-            .delete_label(self.state.context.clone(), id)
-            .await
-    }
-}
+//     async fn delete_label(&self, id: Uuid) -> Result<Label, SDKError> {
+//         self.without_context()
+//             .delete_label(self.state.context.clone(), id)
+//             .await
+//     }
+// }

@@ -4,15 +4,15 @@ use async_graphql::dataloader::Loader;
 
 use uuid::Uuid;
 
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 
 use super::member::{Member, MemberRole};
 
 // #[derive(Clone)]
-pub struct MemberLoader(Arc<SDKEngine>);
+pub struct MemberLoader(Arc<Engine<WithoutContext>>);
 
 impl MemberLoader {
-    pub fn new(e: Arc<SDKEngine>) -> Self {
+    pub fn new(e: Arc<Engine<WithoutContext>>) -> Self {
         Self(e)
     }
 }

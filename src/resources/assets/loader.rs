@@ -4,15 +4,15 @@ use async_graphql::dataloader::Loader;
 
 use uuid::Uuid;
 
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 
 use super::asset::{Asset, AssetKind};
 
 // #[derive(Clone)]
-pub struct AssetLoader(Arc<SDKEngine>);
+pub struct AssetLoader(Arc<Engine<WithoutContext>>);
 
 impl AssetLoader {
-    pub fn new(e: Arc<SDKEngine>) -> Self {
+    pub fn new(e: Arc<Engine<WithoutContext>>) -> Self {
         Self(e)
     }
 }

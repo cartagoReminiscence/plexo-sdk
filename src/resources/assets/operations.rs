@@ -7,7 +7,7 @@ use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 use crate::common::commons::SortOrder;
 use crate::errors::sdk::SDKError;
 use crate::resources::assets::asset::{Asset, AssetKind};
@@ -140,7 +140,7 @@ impl GetAssetsWhere {
 }
 
 #[async_trait]
-impl AssetCrudOperations for SDKEngine {
+impl AssetCrudOperations for Engine<WithoutContext> {
     async fn create_asset(&self, input: CreateAssetInput) -> Result<Asset, SDKError> {
         let asset_final_info = sqlx::query!(
             r#"

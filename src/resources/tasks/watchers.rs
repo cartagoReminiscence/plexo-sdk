@@ -1,5 +1,5 @@
 use super::task::Task;
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 use std::error::Error;
 
 trait TaskWatchers {
@@ -8,7 +8,7 @@ trait TaskWatchers {
         H: Fn(&Task) -> Result<(), Box<dyn Error>>;
 }
 
-impl TaskWatchers for SDKEngine {
+impl TaskWatchers for Engine<WithoutContext> {
     fn watch_created_tasks<H>(&self, _handler: H) -> Result<(), Box<dyn Error>>
     where
         H: Fn(&Task) -> Result<(), Box<dyn Error>>,

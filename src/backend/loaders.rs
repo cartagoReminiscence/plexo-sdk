@@ -8,7 +8,7 @@ use crate::resources::{
     teams::loader::TeamLoader,
 };
 
-use super::engine::SDKEngine;
+use super::v2::{Engine, WithoutContext};
 
 // #[derive(Clone)]
 pub struct SDKLoaders {
@@ -20,11 +20,11 @@ pub struct SDKLoaders {
     pub label_loader: DataLoader<LabelLoader>,
     pub change_loader: DataLoader<ChangeLoader>,
 
-    pub engine: Arc<SDKEngine>,
+    pub engine: Arc<Engine<WithoutContext>>,
 }
 
 impl SDKLoaders {
-    pub fn new(engine: Arc<SDKEngine>) -> Self {
+    pub fn new(engine: Arc<Engine<WithoutContext>>) -> Self {
         Self {
             task_loader: DataLoader::new(TaskLoader::new(engine.clone()), tokio::spawn),
             member_loader: DataLoader::new(MemberLoader::new(engine.clone()), tokio::spawn),

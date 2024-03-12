@@ -2,7 +2,7 @@ use askama::Template;
 use async_trait::async_trait;
 
 use crate::{
-    backend::engine::SDKEngine,
+    backend::v2::{Engine, WithoutContext},
     cognition::{
         operations::{SubdivideTaskInput, TaskSuggestion, TaskSuggestionInput},
         suggestions::CognitionCapabilities,
@@ -89,7 +89,7 @@ pub struct ProjectSuggestionTemplate {
 }
 
 #[async_trait]
-impl CognitionOperationsV2 for SDKEngine {
+impl CognitionOperationsV2 for Engine<WithoutContext> {
     async fn get_suggestions_v2(&self, input: TaskSuggestionInput) -> Result<TaskSuggestion, SDKError> {
         let system_message = PlexoSystemTemplate {}.render().unwrap();
 

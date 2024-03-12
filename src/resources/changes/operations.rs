@@ -7,7 +7,11 @@ use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
-use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{
+    backend::v2::{Engine, WithoutContext},
+    common::commons::SortOrder,
+    errors::sdk::SDKError,
+};
 
 use super::change::{Change, ChangeOperation, ChangeResourceType};
 
@@ -144,7 +148,7 @@ impl GetChangesWhere {
 }
 
 #[async_trait]
-impl ChangeCrudOperations for SDKEngine {
+impl ChangeCrudOperations for Engine<WithoutContext> {
     async fn create_change(&self, input: CreateChangeInput) -> Result<Change, SDKError> {
         let change_info = sqlx::query!(
             r#"

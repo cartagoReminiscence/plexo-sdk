@@ -9,7 +9,7 @@ use sqlx::Row;
 use uuid::Uuid;
 
 use crate::{
-    backend::engine::SDKEngine,
+    backend::v2::{Engine, WithoutContext},
     common::commons::{SortOrder, UpdateListInput},
     errors::sdk::SDKError,
 };
@@ -151,7 +151,7 @@ impl GetTeamsWhere {
 }
 
 #[async_trait]
-impl TeamCrudOperations for SDKEngine {
+impl TeamCrudOperations for Engine<WithoutContext> {
     async fn create_team(&self, input: CreateTeamInput) -> Result<Team, SDKError> {
         let mut tx = self.db_pool.begin().await?;
 

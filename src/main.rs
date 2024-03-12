@@ -1,58 +1,50 @@
-use std::{error::Error, sync::Arc};
+use std::error::Error;
 
 use dotenv::dotenv;
-
-use plexo_sdk::{
-    backend::{
-        context::{Contextualized, EngineContext},
-        engine::{SDKConfig, SDKEngine},
-        loaders::SDKLoaders,
-        v2::{Engine, WithContext}, // loaders::SDKLoaders,
-    },
-    organization::operations::CreateOrganizationInputBuilder,
-    resources::projects::{
-        operations::{GetProjectsInputBuilder, ProjectCrudOperations},
-        project,
-        relations::ProjectRelations,
-    },
-};
+use plexo_sdk::backend::config::SDKConfig;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
 
-    let engine = SDKEngine::new(SDKConfig::from_env()).await?;
+    // let engine = SDKEngine::new(SDKConfig::from_env()).await?;
 
-    let engine = Arc::new(engine);
+    // let engine = Arc::new(engine);
 
     // engine.migrate().await?;
 
+    // Config: Loaders: (Context: Engine)
+
     let config = SDKConfig::from_env();
-    let loaders = SDKLoaders::new(engine.clone());
-    // let ctx = EngineContext::from_credentials("email", "password").await?;
-    // let ctx = EngineContext::from_token("").await?;
-    let ctx = engine.login_with_token("").await?;
 
-    let engine = Engine::<WithContext>::new_with_context(&ctx, config).await?;
+    println!("config: {:?}", config);
 
-    println!("version: {:?}", engine.version()?);
+    // let loaders = SDKLoaders::new(engine.clone());
+    // let context = EngineContext {
+    //     member_id: "123".to_string(),
+    //     _token: "".to_string(),
+    // };
 
-    let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
+    // let engine = Engine::<WithContext>::new_with_context(&ctx, config).await?;
 
-    println!("projects: {:?}", projects);
+    // println!("version: {:?}", engine.version()?);
 
-    engine
-        .initialize_organization(
-            CreateOrganizationInputBuilder::default()
-                .owner_id(ctx.member_id)
-                .photo_url("https://www.google.com".to_string())
-                .name("test org".to_string())
-                .email("foo@bar.com".to_string())
-                .build()?,
-        )
-        .await?;
+    // let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
 
-    let project = projects.first().unwrap().to_owned();
+    // println!("projects: {:?}", projects);
+
+    // engine
+    //     .initialize_organization(
+    //         CreateOrganizationInputBuilder::default()
+    //             .owner_id(ctx.member_id)
+    //             .photo_url("https://www.google.com".to_string())
+    //             .name("test org".to_string())
+    //             .email("foo@bar.com".to_string())
+    //             .build()?,
+    //     )
+    //     .await?;
+
+    // let project = projects.first().unwrap().to_owned();
 
     // let project = Project::<WithContext>::new();
 

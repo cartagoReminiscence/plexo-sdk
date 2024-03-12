@@ -4,16 +4,30 @@ use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
 
-use crate::{backend::engine::SDKEngine, errors::sdk::SDKError};
+use crate::{
+    backend::{
+        context::EngineContext,
+        v2::{Engine, WithoutContext},
+    },
+    errors::sdk::SDKError,
+};
 
 use super::member::{Member, MemberRole};
 
 #[async_trait]
 pub trait MembersExtensionOperations {
-    async fn create_member_from_github(&self, input: CreateMemberFromGithubInput) -> Result<Member, SDKError>;
-    async fn create_member_from_email(&self, input: CreateMemberFromEmailInput) -> Result<Member, SDKError>;
-    async fn get_member_by_github_id(&self, github_id: String) -> Result<Option<Member>, SDKError>;
-    async fn get_member_by_email(&self, email: String) -> Result<Option<Member>, SDKError>;
+    async fn create_member_from_github(
+        &self,
+        ctx: EngineContext,
+        input: CreateMemberFromGithubInput,
+    ) -> Result<Member, SDKError>;
+    async fn create_member_from_email(
+        &self,
+        ctx: EngineContext,
+        input: CreateMemberFromEmailInput,
+    ) -> Result<Member, SDKError>;
+    async fn get_member_by_github_id(&self, ctx: EngineContext, github_id: String) -> Result<Option<Member>, SDKError>;
+    async fn get_member_by_email(&self, ctx: EngineContext, email: String) -> Result<Option<Member>, SDKError>;
 }
 
 #[derive(Default, Builder, InputObject)]
@@ -38,8 +52,12 @@ pub struct CreateMemberFromEmailInput {
 }
 
 #[async_trait]
-impl MembersExtensionOperations for SDKEngine {
-    async fn create_member_from_github(&self, input: CreateMemberFromGithubInput) -> Result<Member, SDKError> {
+impl MembersExtensionOperations for Engine<WithoutContext> {
+    async fn create_member_from_github(
+        &self,
+        ctx: EngineContext,
+        input: CreateMemberFromGithubInput,
+    ) -> Result<Member, SDKError> {
         let member_info = sqlx::query!(
             "
             INSERT INTO members (email, name, github_id, photo_url)
@@ -71,7 +89,11 @@ impl MembersExtensionOperations for SDKEngine {
         })
     }
 
-    async fn create_member_from_email(&self, input: CreateMemberFromEmailInput) -> Result<Member, SDKError> {
+    async fn create_member_from_email(
+        &self,
+        ctx: EngineContext,
+        input: CreateMemberFromEmailInput,
+    ) -> Result<Member, SDKError> {
         let member_info = sqlx::query!(
             "
             INSERT INTO members (email, name, password_hash, photo_url, role)
@@ -104,7 +126,7 @@ impl MembersExtensionOperations for SDKEngine {
         })
     }
 
-    async fn get_member_by_github_id(&self, github_id: String) -> Result<Option<Member>, SDKError> {
+    async fn get_member_by_github_id(&self, ctx: EngineContext, github_id: String) -> Result<Option<Member>, SDKError> {
         let member_info = sqlx::query!(
             "
             SELECT * FROM members
@@ -132,7 +154,7 @@ impl MembersExtensionOperations for SDKEngine {
         }))
     }
 
-    async fn get_member_by_email(&self, email: String) -> Result<Option<Member>, SDKError> {
+    async fn get_member_by_email(&self, ctx: EngineContext, email: String) -> Result<Option<Member>, SDKError> {
         let member_info = sqlx::query!(
             "
             SELECT * FROM members

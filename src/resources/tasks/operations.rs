@@ -12,7 +12,7 @@ use sqlx::Row;
 // use tokio::task;
 use uuid::Uuid;
 
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 use crate::common::commons::{SortOrder, UpdateListInput};
 use crate::errors::sdk::SDKError;
 // use crate::resources::changes::change::{ChangeOperation, ChangeResourceType};
@@ -207,7 +207,7 @@ impl GetTasksWhere {
 }
 
 #[async_trait]
-impl TaskCrudOperations for SDKEngine {
+impl TaskCrudOperations for Engine<WithoutContext> {
     async fn create_task(&self, input: CreateTaskInput) -> Result<Task, SDKError> {
         let mut tx = self.db_pool.begin().await?;
         // let saved_input = input.clone();

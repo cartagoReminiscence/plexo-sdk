@@ -7,7 +7,10 @@ use serde::Serialize;
 use sqlx::Row;
 use uuid::Uuid;
 
-use crate::{backend::engine::SDKEngine, errors::sdk::SDKError};
+use crate::{
+    backend::v2::{Engine, WithoutContext},
+    errors::sdk::SDKError,
+};
 
 use super::{
     operations::{CreateTaskInput, TaskCrudOperations},
@@ -26,7 +29,7 @@ pub trait TasksExtensionOperations {
 }
 
 #[async_trait]
-impl TasksExtensionOperations for SDKEngine {
+impl TasksExtensionOperations for Engine<WithoutContext> {
     async fn create_tasks(&self, input: CreateTasksInput) -> Result<Vec<Task>, SDKError> {
         let mut tx = self.db_pool.begin().await?;
         // let saved_input = input.clone();

@@ -9,10 +9,7 @@ use sqlx::Row;
 use uuid::Uuid;
 
 use crate::{
-    backend::{
-        engine::SDKEngine,
-        v2::{Engine, WithContext},
-    },
+    backend::v2::{Engine, WithContext, WithoutContext},
     common::commons::{SortOrder, UpdateListInput},
     errors::sdk::SDKError,
 };
@@ -190,7 +187,7 @@ impl GetProjectsWhere {
 }
 
 #[async_trait]
-impl ProjectCrudOperations for SDKEngine {
+impl ProjectCrudOperations for Engine<WithoutContext> {
     async fn create_project(&self, input: CreateProjectInput) -> Result<Project, SDKError> {
         let mut tx = self.db_pool.as_ref().begin().await?;
 

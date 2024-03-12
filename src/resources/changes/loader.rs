@@ -4,15 +4,15 @@ use async_graphql::dataloader::Loader;
 
 use uuid::Uuid;
 
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 
 use super::change::{Change, ChangeOperation, ChangeResourceType};
 
 // #[derive(Clone)]
-pub struct ChangeLoader(Arc<SDKEngine>);
+pub struct ChangeLoader(Arc<Engine<WithoutContext>>);
 
 impl ChangeLoader {
-    pub fn new(e: Arc<SDKEngine>) -> Self {
+    pub fn new(e: Arc<Engine<WithoutContext>>) -> Self {
         Self(e)
     }
 }

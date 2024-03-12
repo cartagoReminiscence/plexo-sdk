@@ -8,7 +8,11 @@ use poem_openapi::Object;
 use sqlx::Row;
 use uuid::Uuid;
 
-use crate::{backend::engine::SDKEngine, common::commons::SortOrder, errors::sdk::SDKError};
+use crate::{
+    backend::v2::{Engine, WithoutContext},
+    common::commons::SortOrder,
+    errors::sdk::SDKError,
+};
 
 use super::member::{Member, MemberRole};
 
@@ -162,7 +166,7 @@ impl GetMembersWhere {
 }
 
 #[async_trait]
-impl MemberCrudOperations for SDKEngine {
+impl MemberCrudOperations for Engine<WithoutContext> {
     async fn create_member(&self, input: CreateMemberInput) -> Result<Member, SDKError> {
         let member_final_info = sqlx::query!(
             r#"

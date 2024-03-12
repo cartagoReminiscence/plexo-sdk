@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use super::operations::TaskSuggestionInput;
 use crate::{
-    backend::engine::SDKEngine,
+    backend::v2::{Engine, WithoutContext},
     resources::tasks::{
         operations::{GetTasksInputBuilder, TaskCrudOperations},
         task::Task,
@@ -24,7 +24,7 @@ pub trait CognitionCapabilities {
 }
 
 #[async_trait]
-impl CognitionCapabilities for SDKEngine {
+impl CognitionCapabilities for Engine<WithoutContext> {
     async fn chat_completion(&self, system_message: String, user_message: String) -> String {
         let request = CreateChatCompletionRequestArgs::default()
             .max_tokens(1024u16)

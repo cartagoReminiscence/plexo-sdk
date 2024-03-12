@@ -4,15 +4,15 @@ use async_graphql::dataloader::Loader;
 
 use uuid::Uuid;
 
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 
 use super::label::Label;
 
 // #[derive(Clone)]
-pub struct LabelLoader(Arc<SDKEngine>);
+pub struct LabelLoader(Arc<Engine<WithoutContext>>);
 
 impl LabelLoader {
-    pub fn new(e: Arc<SDKEngine>) -> Self {
+    pub fn new(e: Arc<Engine<WithoutContext>>) -> Self {
         Self(e)
     }
 }

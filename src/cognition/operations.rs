@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::{
-    backend::engine::SDKEngine,
+    backend::v2::{Engine, WithoutContext},
     errors::sdk::SDKError,
     resources::tasks::{
         operations::TaskCrudOperations,
@@ -62,7 +62,7 @@ pub trait CognitionOperations {
 }
 
 #[async_trait]
-impl CognitionOperations for SDKEngine {
+impl CognitionOperations for Engine<WithoutContext> {
     async fn get_suggestions(&self, input: TaskSuggestionInput) -> Result<TaskSuggestion, SDKError> {
         let tasks_fingerprints = self.acquire_tasks_fingerprints(10, input.project_id).await;
 

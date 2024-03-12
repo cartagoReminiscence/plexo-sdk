@@ -4,15 +4,15 @@ use async_graphql::dataloader::Loader;
 
 use uuid::Uuid;
 
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 
 use super::task::{Task, TaskPriority, TaskStatus};
 
 // #[derive(Clone)]
-pub struct TaskLoader(Arc<SDKEngine>);
+pub struct TaskLoader(Arc<Engine<WithoutContext>>);
 
 impl TaskLoader {
-    pub fn new(e: Arc<SDKEngine>) -> Self {
+    pub fn new(e: Arc<Engine<WithoutContext>>) -> Self {
         Self(e)
     }
 }

@@ -4,14 +4,14 @@ use async_graphql::dataloader::Loader;
 
 use uuid::Uuid;
 
-use crate::backend::engine::SDKEngine;
+use crate::backend::v2::{Engine, WithoutContext};
 
 use super::project::{Project, ProjectStatus, ProjectVisibility};
 
-pub struct ProjectLoader(Arc<SDKEngine>);
+pub struct ProjectLoader(Arc<Engine<WithoutContext>>);
 
 impl ProjectLoader {
-    pub fn new(e: Arc<SDKEngine>) -> Self {
+    pub fn new(e: Arc<Engine<WithoutContext>>) -> Self {
         Self(e)
     }
 }
