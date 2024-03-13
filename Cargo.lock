@@ -1952,6 +1952,7 @@ dependencies = [
  "strum_macros 0.26.2",
  "thiserror",
  "tokio",
+ "tokio-stream",
  "uuid",
 ]
 

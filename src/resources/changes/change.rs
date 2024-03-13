@@ -25,19 +25,21 @@ pub struct Change {
 }
 
 #[derive(Debug, Enum, OpenApiEnum, Copy, Clone, Display, EnumString, Deserialize, Serialize, Eq, PartialEq)]
+#[strum(ascii_case_insensitive)]
 pub enum ChangeOperation {
-    Create,
+    Insert,
     Update,
     Delete,
 }
 
 #[derive(Debug, Enum, OpenApiEnum, Copy, Clone, Display, EnumString, Deserialize, Serialize, Eq, PartialEq)]
+#[strum(ascii_case_insensitive)]
 pub enum ChangeResourceType {
-    Task,
-    Project,
-    Member,
-    Team,
-    Asset,
-    Label,
-    Change,
+    Tasks,
+    Projects,
+    Members,
+    Teams,
+    Assets,
+    Labels,
+    Changes,
 }

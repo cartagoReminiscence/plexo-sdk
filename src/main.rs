@@ -1,25 +1,23 @@
-use std::{error::Error, sync::Arc};
+use std::{error::Error, str::FromStr, sync::Arc};
 
 use dotenv::dotenv;
 
 use plexo_sdk::{
-    backend::{
-        engine::{SDKConfig, SDKEngine},
-        // loaders::SDKLoaders,
-    },
+    backend::engine::{SDKConfig, SDKEngine},
     // cognition::{
     // operations::{SubdivideTaskInputBuilder, TaskSuggestionInputBuilder},
     // v2::{operations::CognitionOperationsV2, projects::ProjectSuggestionInputBuilder},
     // },
     // common::commons::SortOrder,
     resources::{
-        projects::{
-            operations::{GetProjectsInputBuilder, ProjectCrudOperations},
-            // relations::ProjectRelations,
-        },
-        // tasks::operations::{GetTasksInputBuilder, TaskCrudOperations},
+        changes::change::ChangeResourceType,
+        projects::operations::{CreateProjectInputBuilder, ProjectCrudOperations},
+        tasks::operations::{CreateTaskInputBuilder, TaskCrudOperations}, // tasks::operations::{GetTasksInputBuilder, TaskCrudOperations},
     },
 };
+use tokio::task;
+use tokio_stream::StreamExt;
+use uuid::Uuid;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -28,64 +26,74 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let engine = SDKEngine::new(SDKConfig::from_env()).await?;
     let engine = Arc::new(engine);
 
-    engine.migrate().await?;
-
-    // let loaders = SDKLoaders::new(engine.clone());
-
     println!("version: {:?}", engine.version()?);
 
-    let projects = engine.get_projects(GetProjectsInputBuilder::default().build()?).await?;
+    let mut tasks_listener = engine.listen(ChangeResourceType::Tasks).await.unwrap();
+    let mut projects_listener = engine.listen(ChangeResourceType::Projects).await.unwrap();
 
-    println!("projects: {:?}", projects);
+    task::spawn(async move {
+        while let Some(Ok(notification)) = tasks_listener.next().await {
+            println!("task event: {:?}", notification);
+        }
+    });
 
-    // let lead = project.lead(&loaders).await?;
+    task::spawn(async move {
+        while let Some(Ok(notification)) = projects_listener.next().await {
+            println!("project event: {:?}", notification);
+        }
+    });
 
-    // let task = engine
-    //     .get_tasks(
-    //         GetTasksInputBuilder::default()
-    //             .sort_by("created_at".to_string())
-    //             .sort_order(SortOrder::Asc)
-    //             .limit(1)
-    //             .build()
-    //             .ok(),
-    //     )
-    //     .await?
-    //     .first()
-    //     .unwrap()
-    //     .to_owned();
+    engine
+        .create_task(
+            CreateTaskInputBuilder::default()
+                .owner_id(Uuid::from_str("f068e8e6-249e-41be-b8aa-bdc84c8a0444")?)
+                .title("task 0x07".to_string())
+                .build()?,
+        )
+        .await?;
 
-    // let suggested_task = engine
-    //     .get_suggestions_v2(
-    //         TaskSuggestionInputBuilder::default()
-    //             .project_id(project.id)
-    //             .title("next big update".to_string())
-    //             .build()?,
-    //     )
-    //     .await?;
+    tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
-    // println!("suggestion: {:?}", suggested_task);
+    engine
+        .create_task(
+            CreateTaskInputBuilder::default()
+                .owner_id(Uuid::from_str("f068e8e6-249e-41be-b8aa-bdc84c8a0444")?)
+                .title("task 0x07".to_string())
+                .build()?,
+        )
+        .await?;
 
-    // let subdivided_tasks = engine
-    //     .subdivide_task_v2(
-    //         SubdivideTaskInputBuilder::default()
-    //             .task_id(task.id)
-    //             .subtasks(3)
-    //             .build()?,
-    //     )
-    //     .await?;
+    let engine_2 = engine.clone();
 
-    // println!("subdivided tasks: {:?}", subdivided_tasks);
+    task::spawn(async move {
+        engine
+            .create_task(
+                CreateTaskInputBuilder::default()
+                    .owner_id(Uuid::from_str("f068e8e6-249e-41be-b8aa-bdc84c8a0444").unwrap())
+                    .title("task 0x07".to_string())
+                    .build()
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
 
-    // let project_suggestion = engine
-    //     .get_project_suggestion(
-    //         ProjectSuggestionInputBuilder::default()
-    //             .description("A new project based on modern web".to_string())
-    //             .generate_tasks_number(3)
-    //             .build()?,
-    //     )
-    //     .await?;
+        // println!("task: {:?}", task.id);
+    });
 
-    // println!("project suggestion: {:?}", project_suggestion);
+    task::spawn(async move {
+        engine_2
+            .create_project(
+                CreateProjectInputBuilder::default()
+                    .owner_id(Uuid::from_str("f068e8e6-249e-41be-b8aa-bdc84c8a0444").unwrap())
+                    .name("p0001".to_string())
+                    .build()
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+    });
+
+    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
 
     Ok(())
 }

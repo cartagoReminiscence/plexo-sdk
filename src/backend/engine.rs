@@ -1,7 +1,12 @@
-use std::{env::var, time::Duration};
+use std::{env::var, pin::Pin, str::FromStr, time::Duration};
 
 use async_openai::{config::OpenAIConfig, Client};
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use sqlx::{
+    postgres::{PgListener, PgPoolOptions},
+    Pool, Postgres,
+};
+
+use tokio_stream::{Stream, StreamExt};
 use uuid::Uuid;
 // use tokio::runtime::Handle;
 
@@ -11,7 +16,7 @@ use crate::{
         Organization, OrganizationCrudOperations, OrganizationInitializationInput, SetOrganizationInputBuilder,
         GLOBAL_ORGANIZATION_SETTINGS_NAME,
     },
-    // resources::tasks::task::Task,
+    resources::changes::change::{ChangeOperation, ChangeResourceType}, // resources::tasks::task::Task,
 };
 // use crossbeam_channel::unbounded;
 
@@ -42,6 +47,7 @@ impl SDKConfig {
 pub struct SDKEngine {
     pub config: SDKConfig,
     pub db_pool: Box<Pool<Postgres>>,
+    // pub db_listener: PgListener,
     pub llm_client: Box<Client<OpenAIConfig>>,
     // pub task_event_send: crossbeam_channel::Sender<Task>,
     // pub task_event_recv: crossbeam_channel::Receiver<Task>,
@@ -62,11 +68,26 @@ impl SDKEngine {
         let db_pool = Box::new(pool);
 
         // let (task_event_send, task_event_recv) = unbounded::<Task>();
+        // let listener = PgListener::connect(&config.database_url).await?;
+
+        // let db_listener = PgListener::connect_with(&db_pool).await?;
+
+        // task::spawn(async move {
+        //     while let Some(notification) = db_listener.try_recv().await.unwrap() {
+        //         println!("notification: {:?}", notification);
+        //     }
+        //     // while let Ok(notification) = listener.recv().await {
+        //     //     println!("notification: {:?}", notification);
+        //     // }
+        // });
+
+        // let a = db_listener.into_stream().;
 
         let engine = SDKEngine {
             config,
             db_pool,
             llm_client,
+            // db_listener,
             // task_event_send,
             // task_event_recv,
         };
@@ -107,4 +128,45 @@ impl SDKEngine {
 
         Ok(org.into())
     }
+
+    pub async fn listen(
+        &self,
+        resource: ChangeResourceType,
+    ) -> Result<Pin<Box<dyn Stream<Item = Result<ListenEvent, SDKError>> + Send>>, SDKError> {
+        let mut db_listener = PgListener::connect_with(&self.db_pool).await?;
+
+        db_listener.listen(channel_name(resource).as_str()).await?;
+
+        let mapped_stream = db_listener.into_stream().map(|x| match x {
+            Ok(not) => {
+                // TG_TABLE_NAME || ' ' || TG_OP || ' ' || row.id;
+
+                let mut payload = not.payload().split_whitespace();
+
+                let resource = ChangeResourceType::from_str(payload.next().unwrap()).unwrap();
+                let operation = ChangeOperation::from_str(payload.next().unwrap()).unwrap();
+                let row_id = payload.next().map(|a| a.parse::<Uuid>().unwrap()).unwrap();
+
+                Ok(ListenEvent {
+                    operation,
+                    resource,
+                    row_id,
+                })
+            }
+            Err(e) => Err(SDKError::from(e)),
+        });
+
+        Ok(Box::pin(mapped_stream))
+    }
+}
+
+#[derive(Debug)]
+pub struct ListenEvent {
+    resource: ChangeResourceType,
+    operation: ChangeOperation,
+    row_id: Uuid,
+}
+
+fn channel_name(res: ChangeResourceType) -> String {
+    format!("{}_table_update", res.to_string().to_lowercase())
 }
