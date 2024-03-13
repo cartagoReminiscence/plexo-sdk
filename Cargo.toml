@@ -1,6 +1,6 @@
 [package]
 name = "plexo-sdk"
-version = "0.4.15"
+version = "0.4.16"
 edition = "2021"
 description = "Plexo SDK"
 license = "MIT OR Apache-2.0"
@@ -35,7 +35,7 @@ poem-openapi = { version = "4.0.1", features = [
     "uuid",
 ] }
 serde = "1.0.197"
-async-openai = "0.19.0"
+async-openai = "0.19.1"
 serde_json = "1.0.114"
 askama = "0.12.1"
 tokio-stream = "0.1.14"
