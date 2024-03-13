@@ -135,7 +135,9 @@ impl SDKEngine {
     ) -> Result<Pin<Box<dyn Stream<Item = Result<ListenEvent, SDKError>> + Send>>, SDKError> {
         let mut db_listener = PgListener::connect_with(&self.db_pool).await?;
 
-        db_listener.listen(channel_name(resource).as_str()).await?;
+        db_listener
+            .listen(format!("{}_table_update", resource.to_string().to_lowercase()).as_str())
+            .await?;
 
         let mapped_stream = db_listener.into_stream().map(|x| match x {
             Ok(not) => {
@@ -162,11 +164,7 @@ impl SDKEngine {
 
 #[derive(Debug)]
 pub struct ListenEvent {
-    resource: ChangeResourceType,
-    operation: ChangeOperation,
-    row_id: Uuid,
-}
-
-fn channel_name(res: ChangeResourceType) -> String {
-    format!("{}_table_update", res.to_string().to_lowercase())
+    pub resource: ChangeResourceType,
+    pub operation: ChangeOperation,
+    pub row_id: Uuid,
 }
