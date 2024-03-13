@@ -150,8 +150,8 @@ impl SDKEngine {
                 let row_id = payload.next().map(|a| a.parse::<Uuid>().unwrap()).unwrap();
 
                 Ok(ListenEvent {
-                    operation,
                     resource,
+                    operation,
                     row_id,
                 })
             }

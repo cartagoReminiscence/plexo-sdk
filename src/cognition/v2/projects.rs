@@ -17,10 +17,15 @@ use crate::{
 #[builder(pattern = "owned")]
 pub struct ProjectTaskSuggestionInput {
     pub title: String,
-    pub description: String,
-    pub status: TaskStatus,
-    pub priority: TaskPriority,
-    pub due_date: DateTime<Utc>,
+
+    #[builder(setter(strip_option), default)]
+    pub description: Option<String>,
+    #[builder(setter(strip_option), default)]
+    pub status: Option<TaskStatus>,
+    #[builder(setter(strip_option), default)]
+    pub priority: Option<TaskPriority>,
+    #[builder(setter(strip_option), default)]
+    pub due_date: Option<DateTime<Utc>>,
 }
 
 #[derive(Default, Builder, Object, InputObject, Serialize)]
