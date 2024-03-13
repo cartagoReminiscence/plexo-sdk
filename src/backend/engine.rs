@@ -16,7 +16,7 @@ use crate::{
         Organization, OrganizationCrudOperations, OrganizationInitializationInput, SetOrganizationInputBuilder,
         GLOBAL_ORGANIZATION_SETTINGS_NAME,
     },
-    resources::changes::change::{ChangeOperation, ChangeResourceType}, // resources::tasks::task::Task,
+    resources::changes::change::{ChangeOperation, ChangeResourceType, ListenEvent}, // resources::tasks::task::Task,
 };
 // use crossbeam_channel::unbounded;
 
@@ -160,11 +160,4 @@ impl SDKEngine {
 
         Ok(Box::pin(mapped_stream))
     }
-}
-
-#[derive(Debug)]
-pub struct ListenEvent {
-    pub resource: ChangeResourceType,
-    pub operation: ChangeOperation,
-    pub row_id: Uuid,
 }

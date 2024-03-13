@@ -24,6 +24,14 @@ pub struct Change {
     pub diff_json: String,
 }
 
+#[derive(Debug, SimpleObject, Object, Clone, Serialize)]
+// #[graphql(name = "SDKListenEvent")]
+pub struct ListenEvent {
+    pub resource: ChangeResourceType,
+    pub operation: ChangeOperation,
+    pub row_id: Uuid,
+}
+
 #[derive(Debug, Enum, OpenApiEnum, Copy, Clone, Display, EnumString, Deserialize, Serialize, Eq, PartialEq)]
 #[strum(ascii_case_insensitive)]
 pub enum ChangeOperation {
