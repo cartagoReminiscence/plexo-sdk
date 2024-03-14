@@ -4,6 +4,7 @@ use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
 use poem_openapi::Object;
+use serde::Serialize;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -33,7 +34,7 @@ pub struct CreateChangeInput {
     pub diff_json: String,
 }
 
-#[derive(Clone, Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct UpdateChangeInput {
     #[builder(setter(strip_option), default)]
