@@ -25,7 +25,7 @@ pub trait TeamCrudOperations {
     async fn delete_team(&self, id: Uuid) -> Result<Team, SDKError>;
 }
 
-#[derive(Default, Object, Builder, InputObject)]
+#[derive(Clone, Default, Object, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateTeamInput {
     pub name: String,
@@ -43,7 +43,7 @@ pub struct CreateTeamInput {
     pub projects: Option<Vec<Uuid>>,
 }
 
-#[derive(Default, Object, Builder, InputObject)]
+#[derive(Clone, Default, Object, Builder, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateTeamInput {
     #[builder(setter(strip_option), default)]

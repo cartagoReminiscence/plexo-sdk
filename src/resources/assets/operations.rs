@@ -21,7 +21,7 @@ pub trait AssetCrudOperations {
     async fn delete_asset(&self, id: Uuid) -> Result<Asset, SDKError>;
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateAssetInput {
     pub name: String,
@@ -35,7 +35,7 @@ pub struct CreateAssetInput {
     pub project_id: Option<Uuid>,
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateAssetInput {
     #[builder(setter(strip_option), default)]
