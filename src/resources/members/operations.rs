@@ -5,6 +5,7 @@ use async_trait::async_trait;
 
 use derive_builder::Builder;
 use poem_openapi::Object;
+use serde::Serialize;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -21,7 +22,7 @@ pub trait MemberCrudOperations {
     async fn delete_member(&self, id: Uuid) -> Result<Member, SDKError>;
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct CreateMemberInput {
     name: String,
@@ -38,7 +39,7 @@ pub struct CreateMemberInput {
     password_hash: Option<String>,
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct UpdateMemberInput {
     #[builder(setter(strip_option), default)]
