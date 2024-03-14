@@ -4,6 +4,7 @@ use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
 use poem_openapi::Object;
+use serde::Serialize;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -21,7 +22,7 @@ pub trait AssetCrudOperations {
     async fn delete_asset(&self, id: Uuid) -> Result<Asset, SDKError>;
 }
 
-#[derive(Clone, Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct CreateAssetInput {
     pub name: String,
@@ -35,7 +36,7 @@ pub struct CreateAssetInput {
     pub project_id: Option<Uuid>,
 }
 
-#[derive(Clone, Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct UpdateAssetInput {
     #[builder(setter(strip_option), default)]

@@ -5,6 +5,7 @@ use async_trait::async_trait;
 
 use derive_builder::Builder;
 use poem_openapi::Object;
+use serde::Serialize;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -25,7 +26,7 @@ pub trait TeamCrudOperations {
     async fn delete_team(&self, id: Uuid) -> Result<Team, SDKError>;
 }
 
-#[derive(Clone, Default, Object, Builder, InputObject)]
+#[derive(Clone, Default, Object, Builder, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct CreateTeamInput {
     pub name: String,
@@ -43,7 +44,7 @@ pub struct CreateTeamInput {
     pub projects: Option<Vec<Uuid>>,
 }
 
-#[derive(Clone, Default, Object, Builder, InputObject)]
+#[derive(Clone, Default, Object, Builder, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct UpdateTeamInput {
     #[builder(setter(strip_option), default)]
