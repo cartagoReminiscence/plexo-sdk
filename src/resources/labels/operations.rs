@@ -2,6 +2,7 @@ use async_graphql::InputObject;
 use async_trait::async_trait;
 use derive_builder::Builder;
 use poem_openapi::Object;
+use serde::Serialize;
 use sqlx::Row;
 use uuid::Uuid;
 
@@ -18,7 +19,7 @@ pub trait LabelCrudOperations {
     async fn delete_label(&self, id: Uuid) -> Result<Label, SDKError>;
 }
 
-#[derive(Clone, Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct CreateLabelInput {
     pub name: String,
@@ -32,7 +33,7 @@ pub struct CreateLabelInput {
     pub color: Option<String>,
 }
 
-#[derive(Clone, Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject, Serialize)]
 #[builder(pattern = "owned")]
 pub struct UpdateLabelInput {
     #[builder(setter(strip_option), default)]
