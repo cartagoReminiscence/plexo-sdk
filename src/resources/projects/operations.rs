@@ -25,7 +25,7 @@ pub trait ProjectCrudOperations {
     async fn delete_project(&self, id: Uuid) -> Result<Project, SDKError>;
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateProjectInput {
     pub name: String,
@@ -55,7 +55,7 @@ pub struct CreateProjectInput {
     pub teams: Option<Vec<Uuid>>,
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateProjectInput {
     #[builder(setter(strip_option), default)]

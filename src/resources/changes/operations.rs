@@ -20,7 +20,7 @@ pub trait ChangeCrudOperations {
     async fn delete_change(&self, id: Uuid) -> Result<Change, SDKError>;
 }
 
-#[derive(Builder, Object, InputObject)]
+#[derive(Clone, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateChangeInput {
     #[graphql(skip)]
@@ -33,7 +33,7 @@ pub struct CreateChangeInput {
     pub diff_json: String,
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateChangeInput {
     #[builder(setter(strip_option), default)]

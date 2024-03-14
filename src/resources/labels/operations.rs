@@ -18,7 +18,7 @@ pub trait LabelCrudOperations {
     async fn delete_label(&self, id: Uuid) -> Result<Label, SDKError>;
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct CreateLabelInput {
     pub name: String,
@@ -32,7 +32,7 @@ pub struct CreateLabelInput {
     pub color: Option<String>,
 }
 
-#[derive(Default, Builder, Object, InputObject)]
+#[derive(Clone, Default, Builder, Object, InputObject)]
 #[builder(pattern = "owned")]
 pub struct UpdateLabelInput {
     #[builder(setter(strip_option), default)]
